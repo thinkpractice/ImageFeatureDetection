@@ -3,6 +3,8 @@ import gdal
 import numpy
 
 class GeoMap(object):
+    """This class represents a standard interface to a GeoMap.
+    """
     def __init__(self, dataset):
         """Constructor
 
@@ -48,14 +50,16 @@ class GeoMap(object):
         return GeoMap(dataset)
 
     def readTile(self, startX, startY, width, height):
-        """
+        """Reads a tile from the map of a size specified by the method parameters
 
-        :param int startX:
-        :param int startY:
-        :param int width:
-        :param int height:
+        :param int startX: the x position of the topleft corner of the tile in pixels
+        :param int startY: the y position of the topleft corner of the tile in pixels
+        :param int width: the width of the tile in pixels
+        :param int height: the height of the tile in pixels
 
-        :return:
+        :return: a numpy array with the RGB information for the tile
+
+        :rtype: ndarray
         """
         R = self.dataset.GetRasterBand(1)
         G = self.dataset.GetRasterBand(2)
