@@ -1,8 +1,8 @@
 import gdal
-from gdalconst import *
-import numpy
-import matplotlib
 import matplotlib.pyplot as plt
+import numpy
+from gdalconst import *
+
 
 def readGeoImage(dataset, startX, startY, width, height):
     R = dataset.GetRasterBand(1)
