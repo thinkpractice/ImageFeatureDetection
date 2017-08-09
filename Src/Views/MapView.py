@@ -3,6 +3,9 @@ from matplotlib.widgets import Button
 
 from Src.Models.GeoMap import GeoMap
 
+class MapView(object):
+    pass
+
 geoMap = GeoMap.open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Parkstad.tif")
 print ("width={}, height={}".format(geoMap.widthInPixels, geoMap.heightInPixels))
 
