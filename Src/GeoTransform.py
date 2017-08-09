@@ -8,6 +8,10 @@ class GeoTransform(object):
         """
         self.__transform = transform
 
+    @property
+    def transform(self):
+        return self.__transform
+
     def getProjectionCoords(self, x, y):
         """This method converts the pixel coordinates (x, y) into the coordinate system used
         by the projection of the map.
@@ -26,6 +30,6 @@ class GeoTransform(object):
         :rtype: tuple (double, double)
         """
         Xp = self.transform[0] + x * self.transform[1] + y * self.transform[2]
-        Yp = 0
+        Yp = self.transform[3] + x * self.transform[4] + y * self.transform[5]
         return (Xp, Yp)
 
