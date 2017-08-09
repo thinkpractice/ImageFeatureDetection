@@ -27,6 +27,13 @@ if dataset is None:
     print("Could not read dataset")
 
 geotransform = dataset.GetGeoTransform()
+print (geotransform)
+
+rasterXSize = dataset.RasterXSize
+rasterYSize = dataset.RasterYSize
+print ("width={}, height={}".format(rasterXSize, rasterYSize))
+
+
 coverageInM = (dataset.RasterXSize * abs(geotransform[1]) + dataset.RasterYSize * abs(geotransform[5]))
 print(coverageInM)
 
