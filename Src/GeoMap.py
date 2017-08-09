@@ -1,3 +1,6 @@
+import gdal
+from gdalconst import *
+
 class GeoMap(object):
     def __init__(self, dataset):
         """Constructor
@@ -17,3 +20,8 @@ class GeoMap(object):
     @property
     def heightInPixels(self):
         return self.dataset.RasterYSize
+
+    @classmethod
+    def open(cls, filename):
+        dataset = gdal.Open(filename, GA_ReadOnly)
+        return GeoMap(dataset)

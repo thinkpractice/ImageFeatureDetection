@@ -1,15 +1,9 @@
 import unittest
-import gdal
-from gdalconst import *
 from Src.GeoMap import GeoMap
 
 class GeoMapTests(unittest.TestCase):
     def setUp(self):
-        self.dataset = gdal.Open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Parkstad.tif", GA_ReadOnly)
-        self.geoMap = GeoMap(self.dataset)
-
-    def testDataSetSetCorrectly(self):
-        self.assertEquals(self.dataset, self.geoMap.dataset)
+        self.geoMap = GeoMap.open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Parkstad.tif")
 
     def testReturnsWidthInPixelsCorrectly(self):
         self.assertEquals(52281, self.geoMap.widthInPixels)
