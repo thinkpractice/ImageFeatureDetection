@@ -1,5 +1,7 @@
 import unittest
-from Src.GeoTransform import GeoTransform
+
+from Src.Models.GeoTransform import GeoTransform
+
 
 class GeoTransformTests(unittest.TestCase):
     def setUp(self):

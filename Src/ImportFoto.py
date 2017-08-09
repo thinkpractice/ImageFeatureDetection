@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
-from Src.GeoMap import GeoMap
+from matplotlib.widgets import Button
+
+from Src.Models.GeoMap import GeoMap
 
 geoMap = GeoMap.open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Parkstad.tif")
 print ("width={}, height={}".format(geoMap.widthInPixels, geoMap.heightInPixels))
@@ -19,4 +21,10 @@ for row in range(numRows):
         x = column * tileWidth
         stacked = geoMap.readTile(x, y, 300, 300)
         axarr[row, column].imshow(stacked, interpolation='nearest', vmin=0)
+
+axprev = plt.axes([0.7, 0.05, 0.1, 0.075])
+axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
+bnext = Button(axnext, 'Next')
+bprev = Button(axprev, 'Previous')
+
 plt.show()

@@ -1,5 +1,7 @@
 import unittest
-from Src.GeoMap import GeoMap
+
+from Src.Models.GeoMap import GeoMap
+
 
 class GeoMapTests(unittest.TestCase):
     def setUp(self):
