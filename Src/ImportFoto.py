@@ -2,12 +2,10 @@ import matplotlib.pyplot as plt
 from Src.GeoMap import GeoMap
 
 geoMap = GeoMap.open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Parkstad.tif")
+print ("width={}, height={}".format(geoMap.widthInPixels, geoMap.heightInPixels))
 
 #geotransform = dataset.GetGeoTransform()
 #print (geotransform)
-
-print ("width={}, height={}".format(geoMap.widthInPixels, geoMap.heightInPixels))
-
 #coverageInM = (dataset.RasterXSize * abs(geotransform[1]) + dataset.RasterYSize * abs(geotransform[5]))
 #print(coverageInM)
 
