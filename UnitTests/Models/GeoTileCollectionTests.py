@@ -31,10 +31,17 @@ class GeoTileCollectionTests(unittest.TestCase):
 
     def testNextMovesTopYByIncrement(self):
         yValues = [0, 30, 60, 90, 0]
-        for rowIndex in range(5):
+        for rowIndex in range(len(yValues)):
             for _ in range(4):
                 self.assertEquals(yValues[rowIndex], self.geoTileCollection.topY, "rowIndex={}".format(rowIndex))
                 self.geoTileCollection.next()
+
+    def testPreviousMovesTopYByNegativeIncrement(self):
+        yValues = [100, 70, 40, 10, 100]
+        for rowIndex in range(len(yValues)):
+            for _ in range(4):
+                self.geoTileCollection.previous()
+                self.assertEquals(yValues[rowIndex], self.geoTileCollection.topY, "rowIndex={}".format(rowIndex))
 
     def testGetTileCallsGeoMapWithCoordinates(self):
         tileCollection1 = self.tileCollectionWith(100, 200, 10, 20)

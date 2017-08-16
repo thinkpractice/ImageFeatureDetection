@@ -55,5 +55,8 @@ class GeoTileCollection(object):
 
     def previous(self):
         self.topX -= self.tileWidth
-        if self.topX < 0:
+        if self.topX <= 0:
             self.topX = self.geoMap.widthInPixels
+            self.topY -= self.tileHeight
+            if self.topY <= 0:
+                self.topY = self.geoMap.heightInPixels
