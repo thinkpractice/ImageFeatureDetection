@@ -42,16 +42,8 @@ class GeoTileCollection(object):
     def tileHeight(self, value):
         self.__tileHeight = value
 
-    @property
-    def numberOfRows(self):
-        return 2
-
-    @property
-    def numberOfColumns(self):
-        return 2
-
-    def getTileAt(self, row, column):
-        pass
+    def getCurrentTile(self):
+        return self.geoMap.readTile(self.topX, self.topY, self.tileWidth, self.tileHeight)
 
     def next(self):
         self.topX += self.tileWidth
