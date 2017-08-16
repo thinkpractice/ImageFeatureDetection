@@ -1,6 +1,23 @@
+from Src.Controllers.GeoMapTileController import GeoMapTileController
+from Src.Models.GeoMap import GeoMap
+from Src.Models.GeoTileCollection import GeoTileCollection
+from Src.Views.MapView import MapView
+
+
 class App(object):
     def main(self):
-        pass
+        geoMap = GeoMap.open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Parkstad.tif")
+        geoTileCollection = GeoTileCollection(geoMap)
+
+        mapView = MapView()
+        self.controller = GeoMapTileController(geoTileCollection, mapView)
+        print("width={}, height={}".format(geoMap.widthInPixels, geoMap.heightInPixels))
+
+        # geotransform = dataset.GetGeoTransform()
+        # print (geotransform)
+        # coverageInM = (dataset.RasterXSize * abs(geotransform[1]) + dataset.RasterYSize * abs(geotransform[5]))
+        # print(coverageInM)
+
 
 if __name__ == '__main__':
     app = App()
