@@ -44,8 +44,8 @@ class GeoTileCollection(object):
 
     @property
     def gpsCoordinates(self):
-        long1, lat1 = self.geoMap.geoTransform.getGpsCoordinateFromRaster(self.topX, self.topY)
-        long2, lat2 = self.geoMap.geoTransform.getGpsCoordinateFromRaster(self.topX + self.tileWidth, self.topY + self.tileHeight)
+        long1, lat1 = self.geoMap.geoTransform.getGpsCoordinateFromRaster(self.topX, self.topY + self.tileHeight)
+        long2, lat2 = self.geoMap.geoTransform.getGpsCoordinateFromRaster(self.topX + self.tileWidth, self.topY)
         return (long1, lat1, long2, lat2)
 
     def getCurrentTile(self):

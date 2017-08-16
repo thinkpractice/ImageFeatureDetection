@@ -1,5 +1,14 @@
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
+import osmapi
+
+def pretty(d, indent=0):
+    for key, value in d.items():
+        print('\t' * indent + str(key))
+        if isinstance(value, dict):
+            pretty(value, indent + 1)
+        else:
+            print('\t' * (indent + 1) + str(value))
 
 class MapView(object):
     def __init__(self):
@@ -26,9 +35,19 @@ class MapView(object):
         print("New tile drawn, gps coordinates={}".format(geoTileCollection.gpsCoordinates))
 
         plt.draw()
+        self.getOsmInfo(geoTileCollection.gpsCoordinates)
 
     def show(self):
         plt.show()
+
+    def getOsmInfo(self, gpsCoordinates):
+        api = osmapi.OsmApi()
+        jsonList = api.Map(gpsCoordinates[0], gpsCoordinates[1], gpsCoordinates[2], gpsCoordinates[3])
+        nodes = [dict for dict in jsonList if dict["type"].lower() == "way"] #"node"]
+        bagNodes = [dict for dict in nodes if dict["data"]["tag"].get("source", "").lower() == "bag"]
+        for dict in bagNodes:
+            pretty(dict)
+
 
 
 
