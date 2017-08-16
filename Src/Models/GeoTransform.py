@@ -59,9 +59,9 @@ class GeoTransform(object):
         return self.transform[1] * self.transform[5] - self.transform[2] * self.transform[4]
 
     def numeratorX(self, Xp, Yp):
-        return self.transform[5] * Xp - self.transform[0] * self.transform[5] - self.transform[2] * Yp + self.transform[
-                                                                                                             2] * \
-                                                                                                         self.transform[3]
+        return self.transform[5] * Xp - self.transform[0] * self.transform[5] - self.transform[2] * Yp + \
+               self.transform[2] * self.transform[3]
+
     def denominatorX(self):
         return self.transform[1] * self.transform[5] - self.transform[4] * self.transform[2]
 
