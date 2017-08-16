@@ -38,9 +38,9 @@ class GeoTransform(object):
         return (Xp, Yp)
 
     def getGpsCoordinate(self, mapX, mapY):
-        mapProjection = Proj(init='epsg:3857')
-        gpsProjection = Proj(proj='latlong',datum='WGS84')
-        longitude, latitude, _ = transform(mapProjection, gpsProjection, mapX, mapY)
+        mapProjection = Proj(init='epsg:28992')
+        gpsProjection = Proj(init='epsg:4326')
+        longitude, latitude = transform(mapProjection, gpsProjection, mapX, mapY)
         return longitude, latitude
 
     def getGpsCoordinateFromRaster(self, x, y):

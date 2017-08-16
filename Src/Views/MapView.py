@@ -23,7 +23,8 @@ class MapView(object):
         tileImage = geoTileCollection.getCurrentTile()
         self.axes.clear()
         self.axes.imshow(tileImage, interpolation='nearest', vmin=0)
-        print("New tile drawn")
+        print("New tile drawn, gps coordinates={}".format(geoTileCollection.gpsCoordinates))
+
         plt.draw()
 
     def show(self):
