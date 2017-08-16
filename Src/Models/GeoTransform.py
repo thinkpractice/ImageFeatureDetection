@@ -50,7 +50,7 @@ class GeoTransform(object):
         """
         x = self.numeratorX(Xp, Yp) / self.denominatorX()
         y = self.numeratorY(Xp, Yp) / self.denominatorY()
-        return (int(x), y)
+        return (int(x), int(y))
 
     def getRasterCoordsFromGps(self, longitude, latitude):
         gpsProjection = Proj(init='epsg:4326')

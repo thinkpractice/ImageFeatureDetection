@@ -47,11 +47,12 @@ class MapView(object):
         bagNodes = [dict for dict in nodes if dict["data"]["tag"].get("source", "").lower() == "bag"]
         for dict in bagNodes:
             pretty(dict)
-        rasterCoordinates = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
-        self.axes.plot(rasterCoordinates[0], rasterCoordinates[1], "o")
+        rasterX, rasterY = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
+        self.axes.scatter(x=rasterX, y=rasterY)
 
     def getRasterCoordinatesFor(self, geoTileCollection, bagNodes):
-        rasterCoordinates = []
+        rasterX = []
+        rasterY = []
         for dict in bagNodes:
             data = dict["data"]
             if "lon" not in data or "lat" not in data:
@@ -59,10 +60,9 @@ class MapView(object):
             longitude = data["lon"]
             latitude = data["lat"]
             gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(longitude, latitude)
-            gps = (gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY)
-            print(gps)
-            rasterCoordinates.append(gps)
-        return rasterCoordinates
+            rasterX.append(gps[0] - geoTileCollection.topX)
+            rasterY.append(gps[1] - geoTileCollection.topY)
+        return rasterX, rasterY
 
 
 
