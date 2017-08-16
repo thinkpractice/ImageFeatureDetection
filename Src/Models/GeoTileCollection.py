@@ -42,6 +42,12 @@ class GeoTileCollection(object):
     def tileHeight(self, value):
         self.__tileHeight = value
 
+    @property
+    def gpsCoordinates(self):
+        long1, lat1 = self.geoMap.geoTransform.getGpsCoordinateFromRaster(self.topX, self.topY)
+        long2, lat2 = self.geoMap.geoTransform.getGpsCoordinateFromRaster(self.topX + self.tileWidth, self.topY + self.tileHeight)
+        return (long1, lat1, long2, lat2)
+
     def getCurrentTile(self):
         return self.geoMap.readTile(self.topX, self.topY, self.tileWidth, self.tileHeight)
 

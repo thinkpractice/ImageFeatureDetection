@@ -43,3 +43,7 @@ class GeoTransform(object):
         longitude, latitude, _ = transform(mapProjection, gpsProjection, mapX, mapY)
         return longitude, latitude
 
+    def getGpsCoordinateFromRaster(self, x, y):
+        Xp, Yp = self.getProjectionCoords(x, y)
+        return self.getGpsCoordinate(Xp, Yp)
+
