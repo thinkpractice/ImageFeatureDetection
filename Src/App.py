@@ -13,8 +13,6 @@ class App(object):
         self.controller = GeoMapTileController(geoTileCollection, mapView)
         print("width={}, height={}".format(geoMap.widthInPixels, geoMap.heightInPixels))
 
-        # geotransform = dataset.GetGeoTransform()
-        # print (geotransform)
         # coverageInM = (dataset.RasterXSize * abs(geotransform[1]) + dataset.RasterYSize * abs(geotransform[5]))
         # print(coverageInM)
 

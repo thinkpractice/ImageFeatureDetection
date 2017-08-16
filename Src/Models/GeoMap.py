@@ -1,4 +1,5 @@
 from gdalconst import *
+from Src.Models.GeoTransform import GeoTransform
 import gdal
 import numpy
 
@@ -35,6 +36,11 @@ class GeoMap(object):
         :rtype: int
         """
         return self.dataset.RasterYSize
+
+    @property
+    def geoTransform(self):
+        transform = self.dataset.GetGeoTransform()
+        return GeoTransform(transform)
 
     @classmethod
     def open(cls, filename):
@@ -75,3 +81,4 @@ class GeoMap(object):
 
         stacked = numpy.append(redArray, greenArray, axis=2)
         return numpy.append(stacked, blueArray, axis=2)
+

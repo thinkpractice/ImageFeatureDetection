@@ -1,5 +1,9 @@
+from pyproj import Proj, transform
+
 class GeoTransform(object):
-    """Docstring for Ge. """
+    """This class performs all the necessary transformations from one projection coordinate system
+    to another
+    """
     def __init__(self, transform):
         """Constructor
 
@@ -32,4 +36,10 @@ class GeoTransform(object):
         Xp = self.transform[0] + x * self.transform[1] + y * self.transform[2]
         Yp = self.transform[3] + x * self.transform[4] + y * self.transform[5]
         return (Xp, Yp)
+
+    def getGpsCoordinate(self, mapX, mapY):
+        mapProjection = Proj(init='epsg:3857')
+        gpsProjection = Proj(proj='latlong',datum='WGS84')
+        longitude, latitude, _ = transform(mapProjection, gpsProjection, mapX, mapY)
+        return longitude, latitude
 
