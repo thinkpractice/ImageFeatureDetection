@@ -2,8 +2,8 @@ class GeoTileCollection(object):
     def __init__(self, geoMap):
         self.__topX = 0
         self.__topY = 0
-        self.__tileWidth = 300
-        self.__tileHeight = 300
+        self.__tileWidth = 2000
+        self.__tileHeight = 2000
         self.__geoMap = geoMap
 
     @property
