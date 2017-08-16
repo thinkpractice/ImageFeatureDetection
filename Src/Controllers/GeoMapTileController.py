@@ -5,14 +5,15 @@ class GeoMapTileController(object):
         self.__view.update(self.__model)
         self.__view.nextButton.on_clicked(self.nextButtonClicked)
         self.__view.previousButton.on_clicked(self.previousButtonClicked)
+        self.__view.show()
 
     def next(self):
-        geoTileCollection = self.__model.next()
-        self.__view.update(geoTileCollection)
+        self.__model.next()
+        self.__view.update(self.__model)
 
     def previous(self):
-        geoTileCollection = self.__model.previous()
-        self.__view.update(geoTileCollection)
+        self.__model.previous()
+        self.__view.update(self.__model)
 
     def nextButtonClicked(self, event):
         print ("next clicked")
