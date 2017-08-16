@@ -17,7 +17,7 @@ class GeoTransform(object):
         return self.__transform
 
     def getProjectionCoords(self, x, y):
-        """This method converts the pixel coordinates (x, y) into the coordinate system used
+        """This method converts the pixel coordinate (x, y) into the coordinate system used
         by the projection of the map.
         The equations used are:
 
@@ -36,6 +36,34 @@ class GeoTransform(object):
         Xp = self.transform[0] + x * self.transform[1] + y * self.transform[2]
         Yp = self.transform[3] + x * self.transform[4] + y * self.transform[5]
         return (Xp, Yp)
+
+    def getRasterCoords(self, Xp, Yp):
+        """This method converts a coordinate in projection space to a raster coordinate.
+
+        :param double Xp: the x coordinate in projection space
+
+        :param double Yp: the y coordinate in projection space
+
+        :return: a tuple with the coordinate in raster coordinates
+
+        :rtype: tuple (int, int)
+        """
+        x = self.numeratorX(Xp, Yp) / self.denominatorX()
+        y = self.numeratorY(Xp, Yp) / self.denominatorY()
+        return (int(x), y)
+
+    def numeratorY(self, Xp, Yp):
+        return self.transform[1] * (Yp - self.transform[3]) - self.transform[4] * Xp + self.transform[4] * \
+                                                              self.transform[0]
+    def denominatorY(self):
+        return self.transform[1] * self.transform[5] - self.transform[2] * self.transform[4]
+
+    def numeratorX(self, Xp, Yp):
+        return self.transform[5] * Xp - self.transform[0] * self.transform[5] - self.transform[2] * Yp + self.transform[
+                                                                                                             2] * \
+                                                                                                         self.transform[3]
+    def denominatorX(self):
+        return self.transform[1] * self.transform[5] - self.transform[4] * self.transform[2]
 
     def getGpsCoordinate(self, mapX, mapY):
         mapProjection = Proj(init='epsg:28992')
