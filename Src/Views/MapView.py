@@ -12,8 +12,8 @@ def pretty(d, indent=0):
 
 class MapView(object):
     def __init__(self):
-        self.__figure = plt.figure()
-        self.axes = self.__figure.add_subplot(1, 1, 1)
+        self.__figure, self.axes = plt.subplots()
+        #self.axes = self.__figure.add_subplot(1, 1, 1)
         axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
         self.__nextButton = Button(axnext, 'Next')
 
@@ -31,22 +31,38 @@ class MapView(object):
     def update(self, geoTileCollection):
         tileImage = geoTileCollection.getCurrentTile()
         self.axes.clear()
-        self.axes.imshow(tileImage, interpolation='nearest', vmin=0)
+        self.axes.imshow(tileImage, extent=[0, geoTileCollection.tileWidth, geoTileCollection.tileHeight, 0])
         print("New tile drawn, gps coordinates={}".format(geoTileCollection.gpsCoordinates))
 
-        plt.draw()
-        self.getOsmInfo(geoTileCollection.gpsCoordinates)
+        self.getOsmInfo(geoTileCollection)
 
     def show(self):
         plt.show()
 
-    def getOsmInfo(self, gpsCoordinates):
+    def getOsmInfo(self, geoTileCollection):
+        gpsCoordinates = geoTileCollection.gpsCoordinates
         api = osmapi.OsmApi()
         jsonList = api.Map(gpsCoordinates[0], gpsCoordinates[1], gpsCoordinates[2], gpsCoordinates[3])
-        nodes = [dict for dict in jsonList if dict["type"].lower() == "way"] #"node"]
+        nodes = [dict for dict in jsonList if dict["type"].lower() == "node"] #== "way"]
         bagNodes = [dict for dict in nodes if dict["data"]["tag"].get("source", "").lower() == "bag"]
         for dict in bagNodes:
             pretty(dict)
+        rasterCoordinates = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
+        self.axes.plot(rasterCoordinates[0], rasterCoordinates[1], "o")
+
+    def getRasterCoordinatesFor(self, geoTileCollection, bagNodes):
+        rasterCoordinates = []
+        for dict in bagNodes:
+            data = dict["data"]
+            if "lon" not in data or "lat" not in data:
+                continue
+            longitude = data["lon"]
+            latitude = data["lat"]
+            gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(longitude, latitude)
+            gps = (gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY)
+            print(gps)
+            rasterCoordinates.append(gps)
+        return rasterCoordinates
 
 
 

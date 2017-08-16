@@ -52,6 +52,12 @@ class GeoTransform(object):
         y = self.numeratorY(Xp, Yp) / self.denominatorY()
         return (int(x), y)
 
+    def getRasterCoordsFromGps(self, longitude, latitude):
+        gpsProjection = Proj(init='epsg:4326')
+        mapProjection = Proj(init='epsg:28992')
+        mapX, mapY = transform(gpsProjection, mapProjection, longitude, latitude)
+        return self.getRasterCoords(mapX, mapY)
+
     def numeratorY(self, Xp, Yp):
         return self.transform[1] * (Yp - self.transform[3]) - self.transform[4] * Xp + self.transform[4] * \
                                                               self.transform[0]
