@@ -1,14 +1,13 @@
-from matplotlib.widgets import Button
-from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
+import os
 import matplotlib.pyplot as plt
-import matplotlib
-import osmapi
 import numpy as np
+import osmapi
+import json
+from matplotlib.widgets import Button
 from skimage.draw import polygon
 from skimage.io import imsave
 from skimage.measure import label, regionprops
-import os
+
 
 def pretty(d, indent=0):
     for key, value in d.items():
@@ -57,6 +56,9 @@ class MapView(object):
         bagNodes = [dict for dict in nodes if dict["data"]["tag"].get("source", "").lower() == "bag"]
         for dict in bagNodes:
             pretty(dict)
+
+        #with open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images/bag_nodes.json", "w") as jsonFile:
+        #    json.dump(bagNodes, jsonFile)
         #rasterX, rasterY = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
         #self.axes.scatter(x=rasterX, y=rasterY)
         self.writeThumbnails(bagNodes, geoTileCollection, tileImage)
@@ -114,9 +116,11 @@ class MapView(object):
             data = nodeDict["data"]
             if "tag" in data and "building" in data["tag"] and "nd" in data and "id" in data and "source" in data["tag"]:
                 imageId = data["id"]
-                isBuilding = data["tag"]["building"].lower() == "yes"
-                #if not isBuilding or data["tag"]["source"].lower() != "bag":
-                #    continue
+                #also other building types are possible house, appartments, etc.
+                #isBuilding = data["tag"]["building"].lower() == "yes"
+                #Only export BAG tags
+                if data["tag"]["source"].lower() != "bag":
+                    continue
                 nodeIds = data["nd"]
                 api = osmapi.OsmApi()
                 nodesDict = api.NodesGet(nodeIds)
