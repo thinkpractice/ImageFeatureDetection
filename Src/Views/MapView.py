@@ -63,27 +63,27 @@ class MapView(object):
 
     def writeThumbnails(self, bagNodes, geoTileCollection, tileImage):
         for imageId, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
-            # maskedImage = tileImage.copy()
-            # rr, cc = polygonArray
-            # imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
-            # imageMask[rr, cc] = 1
-            # labeledImage = label(imageMask)
-            # regions = regionprops(labeledImage)
-            # boundingRect = regions[0].bbox
-            #
-            # imageMask = imageMask != 1
-            #
-            # maskedImage[imageMask] = (0, 0, 0)
-            #
-            # minX = boundingRect[0]
-            # minY = boundingRect[1]
-            # maxX = boundingRect[2]
-            # maxY = boundingRect[3]
-            # maskedImage = maskedImage[minX:maxX, minY:maxY, :]
-            #
-            # filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
-            # imsave(filename, maskedImage)
-            # print("Writing maskedImage: {}".format(filename))
+            maskedImage = tileImage.copy()
+            rr, cc = polygonArray
+            imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
+            imageMask[rr, cc] = 1
+            labeledImage = label(imageMask)
+            regions = regionprops(labeledImage)
+            boundingRect = regions[0].bbox
+
+            imageMask = imageMask != 1
+
+            maskedImage[imageMask] = (0, 0, 0)
+
+            minX = boundingRect[0]
+            minY = boundingRect[1]
+            maxX = boundingRect[2]
+            maxY = boundingRect[3]
+            maskedImage = maskedImage[minX:maxX, minY:maxY, :]
+
+            filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
+            imsave(filename, maskedImage)
+            print("Writing maskedImage: {}".format(filename))
 
             self.drawPolygon(tileImage, polygonArray)
 
