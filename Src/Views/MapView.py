@@ -7,6 +7,7 @@ import osmapi
 import numpy as np
 from skimage.draw import polygon
 from skimage.io import imsave
+from skimage.measure import label, regionprops
 import os
 
 def pretty(d, indent=0):
@@ -37,11 +38,12 @@ class MapView(object):
 
     def update(self, geoTileCollection):
         tileImage = geoTileCollection.getCurrentTile()
+        self.getOsmInfo(geoTileCollection, tileImage)
         self.axes.clear()
         self.axes.imshow(tileImage, extent=[0, geoTileCollection.tileWidth, geoTileCollection.tileHeight, 0])
         print("New tile drawn, gps coordinates={}".format(geoTileCollection.gpsCoordinates))
 
-        self.getOsmInfo(geoTileCollection, tileImage)
+
 
     def show(self):
         plt.show()
@@ -57,26 +59,37 @@ class MapView(object):
             pretty(dict)
         #rasterX, rasterY = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
         #self.axes.scatter(x=rasterX, y=rasterY)
+        self.writeThumbnails(bagNodes, geoTileCollection, tileImage)
+
+    def writeThumbnails(self, bagNodes, geoTileCollection, tileImage):
         for imageId, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
-            maskedImage = tileImage.copy()
-            rr, cc = polygonArray
-            imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
-            imageMask[rr, cc] = 1
-            imageMask = imageMask != 1
-            maskedImage[imageMask] = (0,0,0)
-            filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
-            imsave(filename, maskedImage)
-            print("Writing maskedImage: {}".format(filename))
+            # maskedImage = tileImage.copy()
+            # rr, cc = polygonArray
+            # imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
+            # imageMask[rr, cc] = 1
+            # labeledImage = label(imageMask)
+            # regions = regionprops(labeledImage)
+            # boundingRect = regions[0].bbox
+            #
+            # imageMask = imageMask != 1
+            #
+            # maskedImage[imageMask] = (0, 0, 0)
+            #
+            # minX = boundingRect[0]
+            # minY = boundingRect[1]
+            # maxX = boundingRect[2]
+            # maxY = boundingRect[3]
+            # maskedImage = maskedImage[minX:maxX, minY:maxY, :]
+            #
+            # filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
+            # imsave(filename, maskedImage)
+            # print("Writing maskedImage: {}".format(filename))
 
-        #self.drawPolygons(polygons)
+            self.drawPolygon(tileImage, polygonArray)
 
-    def drawPolygons(self, polygons):
-        patches = []
-        for polygon in polygons:
-            polygon = Polygon(polygon, True)
-            patches.append(polygon)
-        p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=0.4)
-        self.axes.add_collection(p)
+    def drawPolygon(self, tileImage, polygonArray):
+        rr, cc = polygonArray
+        tileImage[rr, cc] = (0,0,255)
 
     def getRasterCoordinatesFor(self, geoTileCollection, bagNodes):
         rasterX = []
@@ -109,6 +122,8 @@ class MapView(object):
                 nodesDict = api.NodesGet(nodeIds)
                 #pretty(nodesDict)
                 polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection, nodeIds, nodesDict)
+                if not polygonCoordinates:
+                    continue
                 yield imageId, polygonCoordinates
 
     def getPolygonCoordinatesFromList(self, geoTileCollection, nodeIds, nodesDict):
@@ -116,10 +131,15 @@ class MapView(object):
         for key, value in nodesDict.items():
             if "lat" not in value and "lon" not in value:
                 continue
-            polygonCoordinates[key] = self.getRasterCoordinatesFromGps(geoTileCollection, value)
+
+            coordinate = self.getRasterCoordinatesFromGps(geoTileCollection, value)
+            if not geoTileCollection.inMap(coordinate):
+                return None
+            polygonCoordinates[key] = coordinate
+
         xCoords = [polygonCoordinates[nodeId][0] for nodeId in nodeIds]
         yCoords = [polygonCoordinates[nodeId][1] for nodeId in nodeIds]
-        return polygon(np.array(xCoords), np.array(yCoords))
+        return polygon(np.array(yCoords),np.array(xCoords))
 
 
 
