@@ -4,6 +4,10 @@ from matplotlib.collections import PatchCollection
 import matplotlib.pyplot as plt
 import matplotlib
 import osmapi
+import numpy as np
+from skimage.draw import polygon
+from skimage.io import imsave
+import os
 
 def pretty(d, indent=0):
     for key, value in d.items():
@@ -37,12 +41,12 @@ class MapView(object):
         self.axes.imshow(tileImage, extent=[0, geoTileCollection.tileWidth, geoTileCollection.tileHeight, 0])
         print("New tile drawn, gps coordinates={}".format(geoTileCollection.gpsCoordinates))
 
-        self.getOsmInfo(geoTileCollection)
+        self.getOsmInfo(geoTileCollection, tileImage)
 
     def show(self):
         plt.show()
 
-    def getOsmInfo(self, geoTileCollection):
+    def getOsmInfo(self, geoTileCollection, tileImage):
         gpsCoordinates = geoTileCollection.gpsCoordinates
         api = osmapi.OsmApi()
         jsonList = api.Map(gpsCoordinates[0], gpsCoordinates[1], gpsCoordinates[2], gpsCoordinates[3])
@@ -53,8 +57,18 @@ class MapView(object):
             pretty(dict)
         #rasterX, rasterY = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
         #self.axes.scatter(x=rasterX, y=rasterY)
-        polygons = self.getPolygonsFor(geoTileCollection, bagNodes)
-        self.drawPolygons(polygons)
+        for imageId, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
+            maskedImage = tileImage.copy()
+            rr, cc = polygonArray
+            imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
+            imageMask[rr, cc] = 1
+            imageMask = imageMask != 1
+            maskedImage[imageMask] = (0,0,0)
+            filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
+            imsave(filename, maskedImage)
+            print("Writing maskedImage: {}".format(filename))
+
+        #self.drawPolygons(polygons)
 
     def drawPolygons(self, polygons):
         patches = []
@@ -71,22 +85,22 @@ class MapView(object):
             data = dict["data"]
             if "lon" not in data or "lat" not in data:
                 continue
-            gps = self.getRasterCoordinatesFromGps(geoTileCollection, data)
-            rasterX.append(gps[0] - geoTileCollection.topX)
-            rasterY.append(gps[1] - geoTileCollection.topY)
+            x, y = self.getRasterCoordinatesFromGps(geoTileCollection, data)
+            rasterX.append(x)
+            rasterY.append(y)
         return rasterX, rasterY
 
     def getRasterCoordinatesFromGps(self, geoTileCollection, data):
         longitude = data["lon"]
         latitude = data["lat"]
         gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(longitude, latitude)
-        return gps
+        return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
 
     def getPolygonsFor(self, geoTileCollection, bagNodes):
-        polygons = []
-        for dict in bagNodes:
-            data = dict["data"]
-            if "tag" in data and "building" in data["tag"] and "nd" in data and "source" in data["tag"]:
+        for nodeDict in bagNodes:
+            data = nodeDict["data"]
+            if "tag" in data and "building" in data["tag"] and "nd" in data and "id" in data and "source" in data["tag"]:
+                imageId = data["id"]
                 isBuilding = data["tag"]["building"].lower() == "yes"
                 #if not isBuilding or data["tag"]["source"].lower() != "bag":
                 #    continue
@@ -95,17 +109,17 @@ class MapView(object):
                 nodesDict = api.NodesGet(nodeIds)
                 #pretty(nodesDict)
                 polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection, nodeIds, nodesDict)
-                polygons.append(polygonCoordinates)
-        return polygons
+                yield imageId, polygonCoordinates
 
     def getPolygonCoordinatesFromList(self, geoTileCollection, nodeIds, nodesDict):
         polygonCoordinates = dict()
         for key, value in nodesDict.items():
             if "lat" not in value and "lon" not in value:
                 continue
-            rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, value)
-            polygonCoordinates[key] = (rasterCoordinates[0] - geoTileCollection.topX, rasterCoordinates[1] - geoTileCollection.topY)
-        return [polygonCoordinates[nodeId] for nodeId in nodeIds]
+            polygonCoordinates[key] = self.getRasterCoordinatesFromGps(geoTileCollection, value)
+        xCoords = [polygonCoordinates[nodeId][0] for nodeId in nodeIds]
+        yCoords = [polygonCoordinates[nodeId][1] for nodeId in nodeIds]
+        return polygon(np.array(xCoords), np.array(yCoords))
 
 
 
