@@ -42,6 +42,12 @@ class GeoMap(object):
         transform = self.dataset.GetGeoTransform()
         return GeoTransform(transform)
 
+    @property
+    def gpsCoordinates(self):
+        long1, lat1 = self.geoTransform.getGpsCoordinateFromRaster(0, self.widthInPixels)
+        long2, lat2 = self.geoTransform.getGpsCoordinateFromRaster(0, self.heightInPixels)
+        return (long1, lat1, long2, lat2)
+
     @classmethod
     def open(cls, filename):
         """Opens a GeoTiff file with filename and returns a GeoMap object for it
