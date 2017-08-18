@@ -2,6 +2,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import osmapi
+import overpy
 import json
 from matplotlib.widgets import Button
 from skimage.draw import polygon
@@ -42,8 +43,6 @@ class MapView(object):
         self.axes.imshow(tileImage, extent=[0, geoTileCollection.tileWidth, geoTileCollection.tileHeight, 0])
         print("New tile drawn, gps coordinates={}".format(geoTileCollection.gpsCoordinates))
 
-
-
     def show(self):
         plt.show()
 
@@ -57,37 +56,57 @@ class MapView(object):
         for dict in bagNodes:
             pretty(dict)
 
+        #self.retrieveWholeMapInfo(geoTileCollection)
         #with open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images/bag_nodes.json", "w") as jsonFile:
         #    json.dump(bagNodes, jsonFile)
         #rasterX, rasterY = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
         #self.axes.scatter(x=rasterX, y=rasterY)
         self.writeThumbnails(bagNodes, geoTileCollection, tileImage)
 
+    def retrieveWholeMapInfo(self, geoTileCollection):
+        print("Retrieving info for whole map")
+        mapGps = geoTileCollection.geoMap.gpsCoordinates
+        overApi = overpy.Overpass()
+        query = """
+            way({},{},{},{})["source" = "BAG"];
+            (._;>;);
+            out body;
+            """.format(mapGps[1], mapGps[0], mapGps[3], mapGps[2])
+        print(query)
+        result = overApi.query(query)
+        print("Query executed")
+        for way in result.ways:
+            print("Name: %s" % way.tags.get("name", "n/a"))
+            # print("  Highway: %s" % way.tags.get("highway", "n/a"))
+            print("  Nodes:")
+            for node in way.nodes:
+                print("    Lat: %f, Lon: %f" % (node.lat, node.lon))
+        print("Results printed")
+
     def writeThumbnails(self, bagNodes, geoTileCollection, tileImage):
         for imageId, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
-            maskedImage = tileImage.copy()
-            rr, cc = polygonArray
-            imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
-            imageMask[rr, cc] = 1
-            labeledImage = label(imageMask)
-            regions = regionprops(labeledImage)
-            boundingRect = regions[0].bbox
-
-            imageMask = imageMask != 1
-
-            maskedImage[imageMask] = (0, 0, 0)
-
-            minX = boundingRect[0]
-            minY = boundingRect[1]
-            maxX = boundingRect[2]
-            maxY = boundingRect[3]
-            maskedImage = maskedImage[minX:maxX, minY:maxY, :]
-
-            filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
-            imsave(filename, maskedImage)
-            print("Writing maskedImage: {}".format(filename))
+            #self.writeThumbnail(geoTileCollection, imageId, polygonArray, tileImage)
 
             self.drawPolygon(tileImage, polygonArray)
+
+    def writeThumbnail(self, geoTileCollection, imageId, polygonArray, tileImage):
+        maskedImage = tileImage.copy()
+        rr, cc = polygonArray
+        imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
+        imageMask[rr, cc] = 1
+        labeledImage = label(imageMask)
+        regions = regionprops(labeledImage)
+        boundingRect = regions[0].bbox
+        imageMask = imageMask != 1
+        maskedImage[imageMask] = (0, 0, 0)
+        minX = boundingRect[0]
+        minY = boundingRect[1]
+        maxX = boundingRect[2]
+        maxY = boundingRect[3]
+        maskedImage = maskedImage[minX:maxX, minY:maxY, :]
+        filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
+        imsave(filename, maskedImage)
+        print("Writing maskedImage: {}".format(filename))
 
     def drawPolygon(self, tileImage, polygonArray):
         rr, cc = polygonArray
@@ -100,14 +119,16 @@ class MapView(object):
             data = dict["data"]
             if "lon" not in data or "lat" not in data:
                 continue
-            x, y = self.getRasterCoordinatesFromGps(geoTileCollection, data)
+            longitude, latitude = self.getGpsCoordinateFromDict(data)
+            x, y = self.getRasterCoordinatesFromGps(geoTileCollection, longitude, latitude)
             rasterX.append(x)
             rasterY.append(y)
         return rasterX, rasterY
 
-    def getRasterCoordinatesFromGps(self, geoTileCollection, data):
-        longitude = data["lon"]
-        latitude = data["lat"]
+    def getGpsCoordinateFromDict(self, data):
+        return data["lon"], data["lat"]
+
+    def getRasterCoordinatesFromGps(self, geoTileCollection, longitude, latitude):
         gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(longitude, latitude)
         return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
 
@@ -136,7 +157,8 @@ class MapView(object):
             if "lat" not in value and "lon" not in value:
                 continue
 
-            coordinate = self.getRasterCoordinatesFromGps(geoTileCollection, value)
+            longitude, latitude = self.getGpsCoordinateFromDict(value)
+            coordinate = self.getRasterCoordinatesFromGps(geoTileCollection, longitude, latitude)
             if not geoTileCollection.inMap(coordinate):
                 return None
             polygonCoordinates[key] = coordinate
