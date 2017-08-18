@@ -44,8 +44,16 @@ class GeoMap(object):
 
     @property
     def gpsCoordinates(self):
-        long1, lat1 = self.geoTransform.getGpsCoordinateFromRaster(0, self.widthInPixels)
-        long2, lat2 = self.geoTransform.getGpsCoordinateFromRaster(0, self.heightInPixels)
+        """Returns the gps coordinates of the whole area of the map. The gps coordinates indicate
+        the bottom left corner and the top right corner in the image.
+
+        :return: a tuple with the longitude and latitude of the bottom left corner and the
+        longitude and latitude of top right corner.
+
+        :rtype: tuple[4]
+        """
+        long1, lat1 = self.geoTransform.getGpsCoordinateFromRaster(0, self.heightInPixels)
+        long2, lat2 = self.geoTransform.getGpsCoordinateFromRaster(self.widthInPixels, 0)
         return (long1, lat1, long2, lat2)
 
     @classmethod
