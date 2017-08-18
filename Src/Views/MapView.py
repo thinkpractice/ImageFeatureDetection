@@ -4,6 +4,8 @@ import numpy as np
 import osmapi
 import overpy
 import json
+
+import time
 from matplotlib.widgets import Button
 from skimage.draw import polygon
 from skimage.io import imsave
@@ -56,7 +58,7 @@ class MapView(object):
         for dict in bagNodes:
             pretty(dict)
 
-        #self.retrieveWholeMapInfo(geoTileCollection)
+        self.retrieveWholeMapInfo(geoTileCollection)
         #with open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images/bag_nodes.json", "w") as jsonFile:
         #    json.dump(bagNodes, jsonFile)
         #rasterX, rasterY = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
@@ -75,19 +77,30 @@ class MapView(object):
         print(query)
         result = overApi.query(query)
         print("Query executed")
+
+        numberOfWays = 0
+        numberOfNodes = 0
         for way in result.ways:
+            numberOfWays += 1
             print("Name: %s" % way.tags.get("name", "n/a"))
             # print("  Highway: %s" % way.tags.get("highway", "n/a"))
             print("  Nodes:")
             for node in way.nodes:
+                numberOfNodes += 1
                 print("    Lat: %f, Lon: %f" % (node.lat, node.lon))
-        print("Results printed")
+        print("Number of ways: {}, number of nodes: {}".format(numberOfWays, numberOfNodes))
 
     def writeThumbnails(self, bagNodes, geoTileCollection, tileImage):
+        startTime = time.time()
+        numberOfThumbnails = 0
         for imageId, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
-            #self.writeThumbnail(geoTileCollection, imageId, polygonArray, tileImage)
+            self.writeThumbnail(geoTileCollection, imageId, polygonArray, tileImage)
 
             self.drawPolygon(tileImage, polygonArray)
+            numberOfThumbnails += 1
+        endTime = time.time()
+        print("Wrote {} thumbnails in {}s".format(numberOfThumbnails, endTime-startTime))
+
 
     def writeThumbnail(self, geoTileCollection, imageId, polygonArray, tileImage):
         maskedImage = tileImage.copy()
