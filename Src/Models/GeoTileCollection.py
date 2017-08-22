@@ -70,3 +70,7 @@ class GeoTileCollection(object):
     def inMap(self, coordinate):
         return coordinate[0] >= 0 and coordinate[0] < self.tileWidth and \
             coordinate[1] >= 0 and coordinate[1] < self.tileHeight
+
+    def inMapArray(self, coordinates):
+        return (coordinates[0] >= 0).all() and (coordinates[0] < self.tileWidth).all() and \
+               (coordinates[1] >= 0).all() and (coordinates[1] < self.tileHeight).all()

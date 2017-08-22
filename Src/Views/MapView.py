@@ -127,6 +127,8 @@ class MapView(object):
     def getPolygonCoordinatesFromList(self, geoTileCollection, nodes):
         geoCoordinates = np.array([[node.lon, node.lat] for node in nodes])
         rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
+        if not geoTileCollection.inMapArray(rasterCoordinates):
+            return None
         return polygon(rasterCoordinates[1],rasterCoordinates[0])
 
     def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
