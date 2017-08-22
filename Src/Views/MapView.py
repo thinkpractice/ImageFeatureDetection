@@ -93,20 +93,30 @@ class MapView(object):
         print("Wrote {} thumbnails in {}s".format(numberOfThumbnails, endTime-startTime))
 
     def writeThumbnail(self, geoTileCollection, imageId, polygonArray, tileImage):
-        maskedImage = tileImage.copy()
-
         boundingRect = self.getBoundingBox(polygonArray)
+        polygonImage = self.getRectangleFromImage(tileImage, boundingRect)
 
-        rr, cc = self.getPolygonFromCoords(polygonArray)
-        imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
-        imageMask[rr, cc] = 1
+        translatedPolygonCoords = self.translateCoords(boundingRect, polygonArray)
+        maskedImage = self.maskImageWithPolygon(polygonImage, translatedPolygonCoords)
 
-        imageMask = imageMask != 1
-        maskedImage[imageMask] = (0, 0, 0)
-        maskedImage = self.getRectangleFromImage(maskedImage, boundingRect)
         filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
         imsave(filename, maskedImage)
         print("Writing maskedImage: {}".format(filename))
+
+    def maskImageWithPolygon(self, polygonImage, translatedPolygonCoords):
+        rr, cc = self.getPolygonFromCoords(translatedPolygonCoords)
+        maskedImage = polygonImage.copy()
+        imageMask = np.zeros([maskedImage.shape[0], maskedImage.shape[1]], dtype=np.uint8)
+        imageMask[rr, cc] = 1
+        imageMask = imageMask != 1
+        maskedImage[imageMask] = (0, 0, 0)
+        return maskedImage
+
+    def translateCoords(self, boundingRect, polygonArray):
+        xCoords, yCoords = polygonArray
+        translatedXCoords = xCoords - boundingRect[0] - 1
+        translatedYCoords = yCoords - boundingRect[1] - 1
+        return translatedXCoords, translatedYCoords
 
     def getPolygonFromCoords(self, polygonArray):
         xCoords, yCoords = polygonArray
