@@ -95,11 +95,11 @@ class MapView(object):
     def writeThumbnail(self, geoTileCollection, imageId, polygonArray, tileImage):
         maskedImage = tileImage.copy()
 
+        boundingRect = self.getBoundingBox(polygonArray)
+
         rr, cc = self.getPolygonFromCoords(polygonArray)
         imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
         imageMask[rr, cc] = 1
-
-        boundingRect = self.getBoundingBox(imageMask)
 
         imageMask = imageMask != 1
         maskedImage[imageMask] = (0, 0, 0)
@@ -113,11 +113,9 @@ class MapView(object):
         rr, cc = polygon(xCoords, yCoords)
         return rr, cc
 
-    def getBoundingBox(self, imageMask):
-        labeledImage = label(imageMask)
-        regions = regionprops(labeledImage)
-        boundingRect = regions[0].bbox
-        return boundingRect
+    def getBoundingBox(self, polygonArray):
+        xCoords, yCoords = polygonArray
+        return (int(xCoords.min()), int(yCoords.min()), int(xCoords.max()), int(yCoords.max()))
 
     def getRectangleFromImage(self, image, boundingRect):
         minX = boundingRect[0]
