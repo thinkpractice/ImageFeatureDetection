@@ -92,28 +92,42 @@ class MapView(object):
         endTime = time.time()
         print("Wrote {} thumbnails in {}s".format(numberOfThumbnails, endTime-startTime))
 
-
     def writeThumbnail(self, geoTileCollection, imageId, polygonArray, tileImage):
         maskedImage = tileImage.copy()
-        rr, cc = polygonArray
+
+        rr, cc = self.getPolygonFromCoords(polygonArray)
         imageMask = np.zeros([geoTileCollection.tileHeight, geoTileCollection.tileWidth], dtype=np.uint8)
         imageMask[rr, cc] = 1
-        labeledImage = label(imageMask)
-        regions = regionprops(labeledImage)
-        boundingRect = regions[0].bbox
+
+        boundingRect = self.getBoundingBox(imageMask)
+
         imageMask = imageMask != 1
         maskedImage[imageMask] = (0, 0, 0)
-        minX = boundingRect[0]
-        minY = boundingRect[1]
-        maxX = boundingRect[2]
-        maxY = boundingRect[3]
-        maskedImage = maskedImage[minX:maxX, minY:maxY, :]
+        maskedImage = self.getRectangleFromImage(maskedImage, boundingRect)
         filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
         imsave(filename, maskedImage)
         print("Writing maskedImage: {}".format(filename))
 
+    def getPolygonFromCoords(self, polygonArray):
+        xCoords, yCoords = polygonArray
+        rr, cc = polygon(xCoords, yCoords)
+        return rr, cc
+
+    def getBoundingBox(self, imageMask):
+        labeledImage = label(imageMask)
+        regions = regionprops(labeledImage)
+        boundingRect = regions[0].bbox
+        return boundingRect
+
+    def getRectangleFromImage(self, image, boundingRect):
+        minX = boundingRect[0]
+        minY = boundingRect[1]
+        maxX = boundingRect[2]
+        maxY = boundingRect[3]
+        return image[minX:maxX, minY:maxY, :]
+
     def drawPolygon(self, tileImage, polygonArray):
-        rr, cc = polygonArray
+        rr, cc = self.getPolygonFromCoords(polygonArray)
         tileImage[rr, cc] = (0,0,255)
 
     def getPolygonsFor(self, geoTileCollection, ways):
@@ -129,7 +143,7 @@ class MapView(object):
         rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
         if not geoTileCollection.inMapArray(rasterCoordinates):
             return None
-        return polygon(rasterCoordinates[1],rasterCoordinates[0])
+        return (rasterCoordinates[1],rasterCoordinates[0])
 
     def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
         gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
