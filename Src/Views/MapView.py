@@ -116,29 +116,9 @@ class MapView(object):
         rr, cc = polygonArray
         tileImage[rr, cc] = (0,0,255)
 
-    def getRasterCoordinatesFor(self, geoTileCollection, bagNodes):
-        rasterX = []
-        rasterY = []
-        for dict in bagNodes:
-            data = dict["data"]
-            if "lon" not in data or "lat" not in data:
-                continue
-            longitude, latitude = self.getGpsCoordinateFromDict(data)
-            x, y = self.getRasterCoordinatesFromGps(geoTileCollection, longitude, latitude)
-            rasterX.append(x)
-            rasterY.append(y)
-        return rasterX, rasterY
-
-    def getGpsCoordinateFromDict(self, data):
-        return data["lon"], data["lat"]
-
-    def getRasterCoordinatesFromGps(self, geoTileCollection, longitude, latitude):
-        gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(longitude, latitude)
-        return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
-
     def getPolygonsFor(self, geoTileCollection, ways):
         for way in ways:
-            imageId = way.get("id", "n/a")
+            imageId = way.id
             polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection, way.nodes)
             if not polygonCoordinates:
                 continue
@@ -148,6 +128,12 @@ class MapView(object):
         geoCoordinates = np.array([[node.lon, node.lat] for node in nodes])
         rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
         return polygon(rasterCoordinates[1],rasterCoordinates[0])
+
+    def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
+        gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
+        return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
+
+
 
 
 
