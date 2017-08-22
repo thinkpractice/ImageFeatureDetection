@@ -85,14 +85,14 @@ class MapView(object):
         startTime = time.time()
         numberOfThumbnails = 0
         for imageId, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
-            self.writeThumbnail(geoTileCollection, imageId, polygonArray, tileImage)
+            self.writeThumbnail(imageId, polygonArray, tileImage)
 
             self.drawPolygon(tileImage, polygonArray)
             numberOfThumbnails += 1
         endTime = time.time()
         print("Wrote {} thumbnails in {}s".format(numberOfThumbnails, endTime-startTime))
 
-    def writeThumbnail(self, geoTileCollection, imageId, polygonArray, tileImage):
+    def writeThumbnail(self, imageId, polygonArray, tileImage):
         boundingRect = self.getBoundingBox(polygonArray)
         polygonImage = self.getRectangleFromImage(tileImage, boundingRect)
 
