@@ -49,46 +49,37 @@ class MapView(object):
         plt.show()
 
     def getOsmInfo(self, geoTileCollection, tileImage):
-        gpsCoordinates = geoTileCollection.gpsCoordinates
-        api = osmapi.OsmApi()
-        jsonList = api.Map(gpsCoordinates[0], gpsCoordinates[1], gpsCoordinates[2], gpsCoordinates[3])
-        #nodes = [dict for dict in jsonList if dict["type"].lower() == "node"]
-        nodes = [dict for dict in jsonList if dict["type"].lower() == "way"]
-        bagNodes = [dict for dict in nodes if dict["data"]["tag"].get("source", "").lower() == "bag"]
-        for dict in bagNodes:
-            pretty(dict)
-
-        self.retrieveWholeMapInfo(geoTileCollection)
-        #with open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images/bag_nodes.json", "w") as jsonFile:
-        #    json.dump(bagNodes, jsonFile)
-        #rasterX, rasterY = self.getRasterCoordinatesFor(geoTileCollection, bagNodes)
-        #self.axes.scatter(x=rasterX, y=rasterY)
-        self.writeThumbnails(bagNodes, geoTileCollection, tileImage)
+        resultsForTile = self.performMapQuery(geoTileCollection.gpsCoordinates)
+        #self.retrieveWholeMapInfo(geoTileCollection)
+        self.writeThumbnails(resultsForTile.ways, geoTileCollection, tileImage)
 
     def retrieveWholeMapInfo(self, geoTileCollection):
         print("Retrieving info for whole map")
-        mapGps = geoTileCollection.geoMap.gpsCoordinates
-        overApi = overpy.Overpass()
-        query = """
-            way({},{},{},{})["source" = "BAG"];
-            (._;>;);
-            out body;
-            """.format(mapGps[1], mapGps[0], mapGps[3], mapGps[2])
-        print(query)
-        result = overApi.query(query)
+        result = self.performMapQuery(geoTileCollection.geoMap.gpsCoordinates)
         print("Query executed")
 
         numberOfWays = 0
         numberOfNodes = 0
         for way in result.ways:
             numberOfWays += 1
-            print("Name: %s" % way.tags.get("name", "n/a"))
+            print("Name: %s" % way.tags.get("id", "n/a"))
             # print("  Highway: %s" % way.tags.get("highway", "n/a"))
             print("  Nodes:")
             for node in way.nodes:
                 numberOfNodes += 1
                 print("    Lat: %f, Lon: %f" % (node.lat, node.lon))
         print("Number of ways: {}, number of nodes: {}".format(numberOfWays, numberOfNodes))
+
+    def performMapQuery(self, gpsBoundary):
+        overApi = overpy.Overpass()
+        query = """
+            way({},{},{},{})["source" = "BAG"];
+            (._;>;);
+            out body;
+            """.format(gpsBoundary[1], gpsBoundary[0], gpsBoundary[3], gpsBoundary[2])
+        print(query)
+        result = overApi.query(query)
+        return result
 
     def writeThumbnails(self, bagNodes, geoTileCollection, tileImage):
         startTime = time.time()
@@ -145,40 +136,18 @@ class MapView(object):
         gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(longitude, latitude)
         return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
 
-    def getPolygonsFor(self, geoTileCollection, bagNodes):
-        for nodeDict in bagNodes:
-            data = nodeDict["data"]
-            if "tag" in data and "building" in data["tag"] and "nd" in data and "id" in data and "source" in data["tag"]:
-                imageId = data["id"]
-                #also other building types are possible house, appartments, etc.
-                #isBuilding = data["tag"]["building"].lower() == "yes"
-                #Only export BAG tags
-                if data["tag"]["source"].lower() != "bag":
-                    continue
-                nodeIds = data["nd"]
-                api = osmapi.OsmApi()
-                nodesDict = api.NodesGet(nodeIds)
-                #pretty(nodesDict)
-                polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection, nodeIds, nodesDict)
-                if not polygonCoordinates:
-                    continue
-                yield imageId, polygonCoordinates
-
-    def getPolygonCoordinatesFromList(self, geoTileCollection, nodeIds, nodesDict):
-        polygonCoordinates = dict()
-        for key, value in nodesDict.items():
-            if "lat" not in value and "lon" not in value:
+    def getPolygonsFor(self, geoTileCollection, ways):
+        for way in ways:
+            imageId = way.get("id", "n/a")
+            polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection, way.nodes)
+            if not polygonCoordinates:
                 continue
+            yield imageId, polygonCoordinates
 
-            longitude, latitude = self.getGpsCoordinateFromDict(value)
-            coordinate = self.getRasterCoordinatesFromGps(geoTileCollection, longitude, latitude)
-            if not geoTileCollection.inMap(coordinate):
-                return None
-            polygonCoordinates[key] = coordinate
-
-        xCoords = [polygonCoordinates[nodeId][0] for nodeId in nodeIds]
-        yCoords = [polygonCoordinates[nodeId][1] for nodeId in nodeIds]
-        return polygon(np.array(yCoords),np.array(xCoords))
+    def getPolygonCoordinatesFromList(self, geoTileCollection, nodes):
+        geoCoordinates = np.array([[node.lon, node.lat] for node in nodes])
+        rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
+        return polygon(rasterCoordinates[1],rasterCoordinates[0])
 
 
 

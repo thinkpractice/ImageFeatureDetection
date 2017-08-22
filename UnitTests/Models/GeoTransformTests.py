@@ -1,5 +1,5 @@
 import unittest
-
+import numpy as np
 from Src.Models.GeoTransform import GeoTransform
 
 
@@ -35,6 +35,14 @@ class GeoTransformTests(unittest.TestCase):
         self.assertEquals(8, self.toProjectionAndBack(3, 8)[1])
         self.assertEquals(9, self.toProjectionAndBack(4, 9)[1])
         self.assertEquals(10, self.toProjectionAndBack(5, 10)[1])
+
+    def testRasterXArrayCoordinateCalculateCorrectly(self):
+        self.assertTrue((np.array([1, 2, 3, 4, 5]) == self.toProjectionAndBack(np.array([1, 2, 3, 4, 5]),
+        np.array([6, 7, 8, 9, 10]))[0]).all())
+
+    def testRasterYArrayCoordinateCalculateCorrectly(self):
+        self.assertTrue((np.array([6, 7, 8, 9, 10]) == self.toProjectionAndBack(np.array([1, 2, 3, 4, 5]),
+        np.array([6, 7, 8, 9, 10]))[1]).all())
 
     #Helper method
     def toProjectionAndBack(self, x, y):
