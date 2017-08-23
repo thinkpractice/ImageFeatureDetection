@@ -1,17 +1,8 @@
-import os
 import matplotlib.pyplot as plt
-import numpy as np
-import osmapi
-import overpy
-import json
-
-import time
 from matplotlib.widgets import Button
 from skimage.draw import polygon
-from skimage.io import imsave
-from skimage.measure import label, regionprops
-
 from Src.Models.OSMPolygonSource import OSMPolygonSource
+from Src.Models.Thumbnailer import Thumbnailer
 
 
 def pretty(d, indent=0):
@@ -58,89 +49,33 @@ class MapView(object):
     def getOsmInfo(self, geoTileCollection, tileImage):
         osmPolygonSource = OSMPolygonSource(geoTileCollection)
         osmPolygonSource.query(geoTileCollection.gpsCoordinates)
-        #self.retrieveWholeMapInfo(geoTileCollection)
         self.drawPolygons(osmPolygonSource.polygons, tileImage)
+
         osmPolygonSource.query(geoTileCollection.gpsCoordinates)
-        self.writeThumbnails(osmPolygonSource.polygons, tileImage)
+        thumbnailer = Thumbnailer(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images")
+        thumbnailer.writeThumbnails(osmPolygonSource.polygons, tileImage)
 
-    def retrieveWholeMapInfo(self, geoTileCollection):
-        print("Retrieving info for whole map")
-        result = self.performMapQuery(geoTileCollection.geoMap.gpsCoordinates)
-        print("Query executed")
-
-        numberOfWays = 0
-        numberOfNodes = 0
-        for way in result.ways:
-            numberOfWays += 1
-            print("Name: %s" % way.tags.get("id", "n/a"))
-            # print("  Highway: %s" % way.tags.get("highway", "n/a"))
-            print("  Nodes:")
-            for node in way.nodes:
-                numberOfNodes += 1
-                print("    Lat: %f, Lon: %f" % (node.lat, node.lon))
-        print("Number of ways: {}, number of nodes: {}".format(numberOfWays, numberOfNodes))
-
-    def performMapQuery(self, gpsBoundary):
-        overApi = overpy.Overpass()
-        query = """
-            way({},{},{},{})["source" = "BAG"];
-            (._;>;);
-            out body;
-            """.format(gpsBoundary[1], gpsBoundary[0], gpsBoundary[3], gpsBoundary[2])
-        print(query)
-        result = overApi.query(query)
-        return result
-
-    def writeThumbnails(self, polygons, tileImage):
-        startTime = time.time()
-        numberOfThumbnails = 0
-        for imageId, polygonArray in polygons:
-            self.writeThumbnail(imageId, polygonArray, tileImage)
-            numberOfThumbnails += 1
-        endTime = time.time()
-        print("Wrote {} thumbnails in {}s".format(numberOfThumbnails, endTime-startTime))
-
-    def writeThumbnail(self, imageId, polygonArray, tileImage):
-        boundingRect = self.getBoundingBox(polygonArray)
-        polygonImage = self.getRectangleFromImage(tileImage, boundingRect)
-
-        translatedPolygonCoords = self.translateCoords(boundingRect, polygonArray)
-        maskedImage = self.maskImageWithPolygon(polygonImage, translatedPolygonCoords)
-
-        filename = os.path.join(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images", "{}.png".format(imageId))
-        imsave(filename, maskedImage)
-        print("Writing maskedImage: {}".format(filename))
-
-    def maskImageWithPolygon(self, polygonImage, translatedPolygonCoords):
-        rr, cc = self.getPolygonFromCoords(translatedPolygonCoords)
-        maskedImage = polygonImage.copy()
-        imageMask = np.zeros([maskedImage.shape[0], maskedImage.shape[1]], dtype=np.uint8)
-        imageMask[rr, cc] = 1
-        imageMask = imageMask != 1
-        maskedImage[imageMask] = (0, 0, 0)
-        return maskedImage
-
-    def translateCoords(self, boundingRect, polygonArray):
-        xCoords, yCoords = polygonArray
-        translatedXCoords = xCoords - boundingRect[0] - 1
-        translatedYCoords = yCoords - boundingRect[1] - 1
-        return translatedXCoords, translatedYCoords
+    # def retrieveWholeMapInfo(self, geoTileCollection):
+    #     print("Retrieving info for whole map")
+    #     result = self.performMapQuery(geoTileCollection.geoMap.gpsCoordinates)
+    #     print("Query executed")
+    #
+    #     numberOfWays = 0
+    #     numberOfNodes = 0
+    #     for way in result.ways:
+    #         numberOfWays += 1
+    #         print("Name: %s" % way.tags.get("id", "n/a"))
+    #         # print("  Highway: %s" % way.tags.get("highway", "n/a"))
+    #         print("  Nodes:")
+    #         for node in way.nodes:
+    #             numberOfNodes += 1
+    #             print("    Lat: %f, Lon: %f" % (node.lat, node.lon))
+    #     print("Number of ways: {}, number of nodes: {}".format(numberOfWays, numberOfNodes))
 
     def getPolygonFromCoords(self, polygonArray):
         xCoords, yCoords = polygonArray
         rr, cc = polygon(xCoords, yCoords)
         return rr, cc
-
-    def getBoundingBox(self, polygonArray):
-        xCoords, yCoords = polygonArray
-        return (int(xCoords.min()), int(yCoords.min()), int(xCoords.max()), int(yCoords.max()))
-
-    def getRectangleFromImage(self, image, boundingRect):
-        minX = boundingRect[0]
-        minY = boundingRect[1]
-        maxX = boundingRect[2]
-        maxY = boundingRect[3]
-        return image[minX:maxX, minY:maxY, :]
 
     def drawPolygon(self, tileImage, polygonArray):
         rr, cc = self.getPolygonFromCoords(polygonArray)
