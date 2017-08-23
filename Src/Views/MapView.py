@@ -11,6 +11,8 @@ from skimage.draw import polygon
 from skimage.io import imsave
 from skimage.measure import label, regionprops
 
+from Src.Models.OSMPolygonSource import OSMPolygonSource
+
 
 def pretty(d, indent=0):
     for key, value in d.items():
@@ -49,15 +51,16 @@ class MapView(object):
     def show(self):
         plt.show()
 
-    def drawPolygons(self, bagNodes, geoTileCollection, tileImage):
-        for _, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
+    def drawPolygons(self, polygons, tileImage):
+        for _, polygonArray in polygons:
             self.drawPolygon(tileImage, polygonArray)
 
     def getOsmInfo(self, geoTileCollection, tileImage):
-        resultsForTile = self.performMapQuery(geoTileCollection.gpsCoordinates)
+        osmPolygonSource = OSMPolygonSource(geoTileCollection)
+        osmPolygonSource.query(geoTileCollection.gpsCoordinates)
         #self.retrieveWholeMapInfo(geoTileCollection)
-        self.drawPolygons(resultsForTile.ways, geoTileCollection, tileImage)
-        self.writeThumbnails(resultsForTile.ways, geoTileCollection, tileImage)
+        self.drawPolygons(osmPolygonSource.polygons, tileImage)
+        self.writeThumbnails(osmPolygonSource.polygons, tileImage)
 
     def retrieveWholeMapInfo(self, geoTileCollection):
         print("Retrieving info for whole map")
@@ -87,10 +90,10 @@ class MapView(object):
         result = overApi.query(query)
         return result
 
-    def writeThumbnails(self, bagNodes, geoTileCollection, tileImage):
+    def writeThumbnails(self, polygons, tileImage):
         startTime = time.time()
         numberOfThumbnails = 0
-        for imageId, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
+        for imageId, polygonArray in polygons:
             self.writeThumbnail(imageId, polygonArray, tileImage)
             numberOfThumbnails += 1
         endTime = time.time()

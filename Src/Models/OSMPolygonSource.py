@@ -8,7 +8,7 @@ class OSMPolygonSource(PolygonSource):
 
     def query(self, gpsBoundingBox):
         results = self.performMapQuery(gpsBoundingBox)
-        self.polygons = self.getPolygonsFor(self, results.ways)
+        self.polygons = self.getPolygonsFor(self.geoTileCollection, results.ways)
 
     def performMapQuery(self, gpsBoundary):
         overApi = overpy.Overpass()
