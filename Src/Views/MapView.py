@@ -60,6 +60,7 @@ class MapView(object):
         osmPolygonSource.query(geoTileCollection.gpsCoordinates)
         #self.retrieveWholeMapInfo(geoTileCollection)
         self.drawPolygons(osmPolygonSource.polygons, tileImage)
+        osmPolygonSource.query(geoTileCollection.gpsCoordinates)
         self.writeThumbnails(osmPolygonSource.polygons, tileImage)
 
     def retrieveWholeMapInfo(self, geoTileCollection):
@@ -144,23 +145,3 @@ class MapView(object):
     def drawPolygon(self, tileImage, polygonArray):
         rr, cc = self.getPolygonFromCoords(polygonArray)
         tileImage[rr, cc] = (0,0,255)
-
-    def getPolygonsFor(self, geoTileCollection, ways):
-        for way in ways:
-            imageId = way.id
-            polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection, way.nodes)
-            if not polygonCoordinates:
-                continue
-            yield imageId, polygonCoordinates
-
-    def getPolygonCoordinatesFromList(self, geoTileCollection, nodes):
-        geoCoordinates = np.array([[node.lon, node.lat] for node in nodes])
-        rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
-        if not geoTileCollection.inMapArray(rasterCoordinates):
-            return None
-        return (rasterCoordinates[1],rasterCoordinates[0])
-
-    def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
-        gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
-        return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
-
