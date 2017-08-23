@@ -41,6 +41,7 @@ class MapView(object):
     def update(self, geoTileCollection):
         tileImage = geoTileCollection.getCurrentTile()
         self.getOsmInfo(geoTileCollection, tileImage)
+
         self.axes.clear()
         self.axes.imshow(tileImage, extent=[0, geoTileCollection.tileWidth, geoTileCollection.tileHeight, 0])
         print("New tile drawn, gps coordinates={}".format(geoTileCollection.gpsCoordinates))
@@ -48,9 +49,14 @@ class MapView(object):
     def show(self):
         plt.show()
 
+    def drawPolygons(self, bagNodes, geoTileCollection, tileImage):
+        for _, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
+            self.drawPolygon(tileImage, polygonArray)
+
     def getOsmInfo(self, geoTileCollection, tileImage):
         resultsForTile = self.performMapQuery(geoTileCollection.gpsCoordinates)
         #self.retrieveWholeMapInfo(geoTileCollection)
+        self.drawPolygons(resultsForTile.ways, geoTileCollection, tileImage)
         self.writeThumbnails(resultsForTile.ways, geoTileCollection, tileImage)
 
     def retrieveWholeMapInfo(self, geoTileCollection):
@@ -86,8 +92,6 @@ class MapView(object):
         numberOfThumbnails = 0
         for imageId, polygonArray in self.getPolygonsFor(geoTileCollection, bagNodes):
             self.writeThumbnail(imageId, polygonArray, tileImage)
-
-            self.drawPolygon(tileImage, polygonArray)
             numberOfThumbnails += 1
         endTime = time.time()
         print("Wrote {} thumbnails in {}s".format(numberOfThumbnails, endTime-startTime))
@@ -156,12 +160,4 @@ class MapView(object):
     def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
         gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
         return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
-
-
-
-
-
-
-
-
 
