@@ -35,6 +35,29 @@ class ImageTilerTests(unittest.TestCase):
         self.assertEquals(4, ImageTiler(self.mapWithWidth(255), 64, 400).numberOfColumns)
         self.assertEquals(5, ImageTiler(self.mapWithWidth(257), 64, 500).numberOfColumns)
 
+    def testImageTilerBoundingBoxInTiler(self):
+        pass
+
+    def testImageTilerLoadsNextTiles(self):
+        map = self.mapWith(100, 100)
+        imageTiler = ImageTiler(map, 32, 64)
+        next(imageTiler)
+        map.readTile(0, 0, 32, 64)
+        next(imageTiler)
+        map.readTile(32, 0, 32, 64)
+        next(imageTiler)
+        map.readTile(64, 0, 32, 64)
+        next(imageTiler)
+        map.readTile(96, 0, 4, 64)
+
+
+    #Helper methods
+    def mapWith(self, width, height):
+        map = MagicMock()
+        type(map).widthInPixels = PropertyMock(return_value=width)
+        type(map).heightInPixels = PropertyMock(return_value=height)
+        return map
+
     def mapWithWidth(self, width):
         map = MagicMock()
         type(map).widthInPixels = PropertyMock(return_value=width)
