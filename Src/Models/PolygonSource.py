@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class PolygonSource(object):
     def __init__(self, geoTileCollection):
         self.__polygons = []
@@ -17,3 +20,14 @@ class PolygonSource(object):
 
     def query(self, gpsBoundingBox):
         pass
+
+    def getPolygonCoordinatesFromList(self, geoTileCollection, gpsCoordinates):
+        geoCoordinates = np.array(gpsCoordinates)
+        rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
+        if not geoTileCollection.inMapArray(rasterCoordinates):
+            return None
+        return (rasterCoordinates[1],rasterCoordinates[0])
+
+    def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
+        gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
+        return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY

@@ -1,6 +1,7 @@
-from Src.Models.PolygonSource import PolygonSource
 import overpy
-import numpy as np
+
+from Src.Models.PolygonSource import PolygonSource
+
 
 class OSMPolygonSource(PolygonSource):
     def __init__(self, geoTileCollection):
@@ -24,20 +25,9 @@ class OSMPolygonSource(PolygonSource):
     def getPolygonsFor(self, geoTileCollection, ways):
         for way in ways:
             imageId = way.id
-            polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection, way.nodes)
+            polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection,[[node.lon, node.lat] for node in way.nodes])
             if not polygonCoordinates:
                 continue
             yield imageId, polygonCoordinates
-
-    def getPolygonCoordinatesFromList(self, geoTileCollection, nodes):
-        geoCoordinates = np.array([[node.lon, node.lat] for node in nodes])
-        rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
-        if not geoTileCollection.inMapArray(rasterCoordinates):
-            return None
-        return (rasterCoordinates[1],rasterCoordinates[0])
-
-    def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
-        gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
-        return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
 
 

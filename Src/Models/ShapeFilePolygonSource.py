@@ -6,5 +6,12 @@ class ShapeFilePolygonSource(PolygonSource):
         super().__init__(geoTileCollection)
 
     def query(self, gpsBoundingBox):
-        sf = shapefile.Reader(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Shapes/pand_parkstad_wgs84")
-        shapes = sf.shapes()
+        buildings = []
+        buildingShapes = shapefile.Reader(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Shapes/pand_parkstad_wgs84")
+        for buildingShape in buildingShapes.iterShapes():
+            shapeBoundingBox = buildingShape.bbox
+            if self.withinBox(shapeBoundingBox, gpsBoundingBox):
+                buildings.append(buildingShape)
+
+    def withinBox(self, shapeBbox, gpsBbox):
+        return False
