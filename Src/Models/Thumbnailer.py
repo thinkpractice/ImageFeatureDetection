@@ -22,15 +22,18 @@ class Thumbnailer(object):
         print("Wrote {} thumbnails in {}s".format(numberOfThumbnails, endTime-startTime))
 
     def writeThumbnail(self, imageId, polygonArray, tileImage):
+        filename = os.path.join(self.exportDirectory, "{}.png".format(imageId))
         boundingRect = self.getBoundingBox(polygonArray)
         polygonImage = self.getRectangleFromImage(tileImage, boundingRect)
+        if polygonImage is None:
+            print("Wrong image dimensions for: {} bbox: {}".format(filename, boundingRect))
+            return
 
         translatedPolygonCoords = self.translateCoords(boundingRect, polygonArray)
         maskedImage = self.maskImageWithPolygon(polygonImage, translatedPolygonCoords)
 
-        filename = os.path.join(self.exportDirectory, "{}.png".format(imageId))
+        print("Writing maskedImage: {} bbox: {}".format(filename, boundingRect))
         imsave(filename, maskedImage)
-        print("Writing maskedImage: {}".format(filename))
 
     def maskImageWithPolygon(self, polygonImage, translatedPolygonCoords):
         rr, cc = self.getPolygonFromCoords(translatedPolygonCoords)
@@ -54,11 +57,14 @@ class Thumbnailer(object):
 
     def getBoundingBox(self, polygonArray):
         xCoords, yCoords = polygonArray
-        return (int(xCoords.min()), int(yCoords.min()), int(xCoords.max()), int(yCoords.max()))
+        return (int(round(xCoords.min())), int(round(yCoords.min())), int(round(xCoords.max())), int(round(yCoords.max())))
 
     def getRectangleFromImage(self, image, boundingRect):
         minX = boundingRect[0]
         minY = boundingRect[1]
         maxX = boundingRect[2]
         maxY = boundingRect[3]
+        if minX == maxX or minY == maxY:
+            return None
+
         return image[minX:maxX, minY:maxY, :]

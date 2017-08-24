@@ -48,7 +48,7 @@ class MapView(object):
             self.drawPolygon(tileImage, polygonArray)
 
     def getShapeInfo(self, geoTileCollection, tileImage):
-        polygonSource = self.getPolygonSource(geoTileCollection, True)
+        polygonSource = self.getPolygonSource(geoTileCollection, False)
 
         polygonSource.query(geoTileCollection.gpsCoordinates)
         thumbnailer = Thumbnailer(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images")
