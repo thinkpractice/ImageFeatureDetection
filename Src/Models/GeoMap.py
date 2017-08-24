@@ -85,6 +85,10 @@ class GeoMap(object):
         G = self.dataset.GetRasterBand(2)
         B = self.dataset.GetRasterBand(3)
 
+        print("blocksize R={}".format(R.GetBlockSize()))
+        print("blocksize G={}".format(G.GetBlockSize()))
+        print("blocksize B={}".format(B.GetBlockSize()))
+
         redArray = R.ReadAsArray(xoff=startX, yoff=startY, win_xsize=width, win_ysize=height)
         greenArray = G.ReadAsArray(xoff=startX, yoff=startY, win_xsize=width, win_ysize=height)
         blueArray = B.ReadAsArray(xoff=startX, yoff=startY, win_xsize=width, win_ysize=height)
