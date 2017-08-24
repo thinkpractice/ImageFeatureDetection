@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 from skimage.draw import polygon
 from Src.Models.OSMPolygonSource import OSMPolygonSource
+from Src.Models.ShapeFilePolygonSource import ShapeFilePolygonSource
 from Src.Models.Thumbnailer import Thumbnailer
 
 
@@ -33,7 +34,7 @@ class MapView(object):
 
     def update(self, geoTileCollection):
         tileImage = geoTileCollection.getCurrentTile()
-        self.getOsmInfo(geoTileCollection, tileImage)
+        self.getShapeInfo(geoTileCollection, tileImage)
 
         self.axes.clear()
         self.axes.imshow(tileImage, extent=[0, geoTileCollection.tileWidth, geoTileCollection.tileHeight, 0])
@@ -46,14 +47,20 @@ class MapView(object):
         for _, polygonArray in polygons:
             self.drawPolygon(tileImage, polygonArray)
 
-    def getOsmInfo(self, geoTileCollection, tileImage):
-        osmPolygonSource = OSMPolygonSource(geoTileCollection)
-        osmPolygonSource.query(geoTileCollection.gpsCoordinates)
-        self.drawPolygons(osmPolygonSource.polygons, tileImage)
+    def getShapeInfo(self, geoTileCollection, tileImage):
+        polygonSource = self.getPolygonSource(geoTileCollection, True)
 
-        osmPolygonSource.query(geoTileCollection.gpsCoordinates)
+        polygonSource.query(geoTileCollection.gpsCoordinates)
         thumbnailer = Thumbnailer(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images")
-        thumbnailer.writeThumbnails(osmPolygonSource.polygons, tileImage)
+        thumbnailer.writeThumbnails(polygonSource.polygons, tileImage)
+
+        polygonSource.query(geoTileCollection.gpsCoordinates)
+        self.drawPolygons(polygonSource.polygons, tileImage)
+
+    def getPolygonSource(self, geoTileCollection, openStreetMap):
+        if openStreetMap:
+            return OSMPolygonSource(geoTileCollection)
+        return ShapeFilePolygonSource(geoTileCollection)
 
     # def retrieveWholeMapInfo(self, geoTileCollection):
     #     print("Retrieving info for whole map")
