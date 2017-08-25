@@ -1,12 +1,13 @@
 import math
+from collections import deque
 
 class ImageTiler(object):
     def __init__(self, map, blockXSize, blockYSize):
         self.__map = map
-        self.__bufferedMaps = []
+        self.__bufferedMaps = deque()
         self.__blockXSize = blockXSize
         self.__blockYSize = blockYSize
-        self.__activeTile = 0
+        self.__activeTileNumber = 0
         self.__currentTileCoordinates = (0, 0)
         self.__previousTileCoordinates = (0, 0)
 
@@ -16,7 +17,7 @@ class ImageTiler(object):
 
     @property
     def activeTileNumber(self):
-        return self.__activeTile
+        return self.__activeTileNumber
 
     @property
     def currentTileCoordinates(self):
@@ -42,6 +43,10 @@ class ImageTiler(object):
     def numberOfCells(self):
         return self.numberOfRows * self.numberOfColumns
 
+    @property
+    def activeTile(self):
+        return  self.__bufferedMaps[0]
+
     def __iter__(self):
         return self
 
@@ -56,10 +61,9 @@ class ImageTiler(object):
             if self.activeTileNumber > 0:
                 self.__currentTileCoordinates = self.__previousTileCoordinates
             if self.activeTileNumber > 1:
-                del self.__bufferedMaps[self.activeTileNumber-2]
-            self.__map = self.__bufferedMaps[self.activeTileNumber]
+                self.__bufferedMaps.popleft()
             self.__previousTileCoordinates = (x, y)
-            self.__activeTile += 1
+            self.__activeTileNumber += 1
 
     def getTileCoordinates(self, tileNumber):
         rowNumber = tileNumber // self.numberOfColumns

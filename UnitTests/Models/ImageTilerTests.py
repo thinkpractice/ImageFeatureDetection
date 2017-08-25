@@ -1,10 +1,11 @@
 import unittest
 from unittest.mock import MagicMock, PropertyMock, call
 from Src.Models.ImageTiler import ImageTiler
+import numpy as np
 
 class ImageTilerTests(unittest.TestCase):
     def setUp(self):
-        self.map = MagicMock()
+        self.map = self.mapWith(100,100)
 
     def testImageTilerBlockXSizeSetCorrectly(self):
         self.assertEquals(32, ImageTiler(self.map, 32, 100).blockXSize)
@@ -81,19 +82,14 @@ class ImageTilerTests(unittest.TestCase):
         map = MagicMock()
         type(map).widthInPixels = PropertyMock(return_value=width)
         type(map).heightInPixels = PropertyMock(return_value=height)
+        type(map).readTile = MagicMock(return_value=np.zeros([height, width]))
         return map
 
     def mapWithWidth(self, width):
-        map = MagicMock()
-        type(map).widthInPixels = PropertyMock(return_value=width)
-        type(map).heightInPixels = PropertyMock(return_value=1)
-        return map
+        return self.mapWith(width, 1)
 
     def mapWithHeight(self, height):
-        map = MagicMock()
-        type(map).widthInPixels = PropertyMock(return_value=1)
-        type(map).heightInPixels = PropertyMock(return_value=height)
-        return map
+        return self.mapWith(1, height)
 
 if __name__ == '__main__':
     unittest.main()
