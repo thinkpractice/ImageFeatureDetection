@@ -1,6 +1,9 @@
 import math
 from collections import deque
 
+from Src.Models.ImageTile import ImageTile
+
+
 class ImageTiler(object):
     def __init__(self, map, blockXSize, blockYSize):
         self.__map = map
@@ -53,17 +56,23 @@ class ImageTiler(object):
     def __next__(self):
         if (self.activeTileNumber == 0):
             x, y = self.getTileCoordinates(self.activeTileNumber)
-            self.__bufferedMaps.append(self.map.readTile(x, y, self.blockXSize, self.blockYSize))
+            self.__bufferedMaps.append(self.readImageTile(x, y))
             self.__currentTileCoordinates = (x,y)
         if (self.activeTileNumber < self.numberOfCells):
             x, y = self.getTileCoordinates(self.activeTileNumber + 1)
-            self.__bufferedMaps.append(self.map.readTile(x, y, self.blockXSize, self.blockYSize))
+            self.__bufferedMaps.append(self.readImageTile(x, y))
             if self.activeTileNumber > 0:
+
                 self.__currentTileCoordinates = self.__previousTileCoordinates
             if self.activeTileNumber > 1:
                 self.__bufferedMaps.popleft()
             self.__previousTileCoordinates = (x, y)
             self.__activeTileNumber += 1
+            return self.activeTile
+        raise StopIteration()
+
+    def getImageForBoundingBox(self, boundingBox):
+        pass
 
     def getTileCoordinates(self, tileNumber):
         rowNumber = tileNumber // self.numberOfColumns
@@ -71,3 +80,8 @@ class ImageTiler(object):
         topX = columnNumber * self.blockXSize
         topY = rowNumber * self.blockYSize
         return (topX, topY)
+
+    def readImageTile(self, x, y):
+        image = self.map.readTile(x, y, self.blockXSize, self.blockYSize)
+        boundingBox = (x, y, self.blockXSize, self.blockYSize)
+        return ImageTile(image, boundingBox)

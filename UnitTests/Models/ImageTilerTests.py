@@ -43,9 +43,6 @@ class ImageTilerTests(unittest.TestCase):
         self.assertEquals((32,64), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(4))
         self.assertEquals((64,64), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(5))
 
-    def testImageTilerBoundingBoxInTiler(self):
-        pass
-
     def testImageTilerLoadsNextTiles(self):
         map = self.mapWith(100, 200)
         imageTiler = ImageTiler(map, 100, 64)
