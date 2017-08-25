@@ -3,9 +3,12 @@ import math
 class ImageTiler(object):
     def __init__(self, map, blockXSize, blockYSize):
         self.__map = map
+        self.__bufferedMaps = dict()
         self.__blockXSize = blockXSize
         self.__blockYSize = blockYSize
         self.__activeTile = 0
+        self.__currentTileCoordinates = (0, 0)
+        self.__previousTileCoordinates = (0, 0)
 
     @property
     def map(self):
@@ -14,6 +17,10 @@ class ImageTiler(object):
     @property
     def activeTileNumber(self):
         return self.__activeTile
+
+    @property
+    def currentTileCoordinates(self):
+        return self.__currentTileCoordinates
 
     @property
     def blockXSize(self):
@@ -41,10 +48,14 @@ class ImageTiler(object):
     def __next__(self):
         if (self.activeTileNumber == 0):
             x, y = self.getTileCoordinates(self.activeTileNumber)
-            self.map.readTile(x, y, self.blockXSize, self.blockYSize)
+            self.__bufferedMaps[(x, y)] = self.map.readTile(x, y, self.blockXSize, self.blockYSize)
+            self.__currentTileCoordinates = (x,y)
         if (self.activeTileNumber < self.numberOfCells):
             x, y = self.getTileCoordinates(self.activeTileNumber + 1)
-            self.map.readTile(x, y, self.blockXSize, self.blockYSize)
+            self.__bufferedMaps[(x, y)] = self.map.readTile(x, y, self.blockXSize, self.blockYSize)
+            if self.activeTileNumber > 0:
+                self.__currentTileCoordinates = self.__previousTileCoordinates
+            self.__previousTileCoordinates = (x, y)
             self.__activeTile += 1
 
     def getTileCoordinates(self, tileNumber):

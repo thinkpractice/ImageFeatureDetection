@@ -61,6 +61,21 @@ class ImageTilerTests(unittest.TestCase):
         self.assertEquals(3, imageTiler.activeTileNumber)
         next(imageTiler)
 
+    def testCurrentTileCoordinatesUpdatedCorrectly(self):
+        imageTiler =  ImageTiler(self.mapWith(68, 100), 32, 64)
+        next(imageTiler)
+        self.assertEquals((0, 0), imageTiler.currentTileCoordinates)
+        next(imageTiler)
+        self.assertEquals((32, 0), imageTiler.currentTileCoordinates)
+        next(imageTiler)
+        self.assertEquals((64, 0), imageTiler.currentTileCoordinates)
+        next(imageTiler)
+        self.assertEquals((0, 64), imageTiler.currentTileCoordinates)
+        next(imageTiler)
+        self.assertEquals((32, 64), imageTiler.currentTileCoordinates)
+        next(imageTiler)
+        self.assertEquals((64, 64), imageTiler.currentTileCoordinates)
+
     #Helper methods
     def mapWith(self, width, height):
         map = MagicMock()
