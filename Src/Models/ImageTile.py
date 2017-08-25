@@ -12,7 +12,9 @@ class ImageTile(object):
         return self.__boundingBox
 
     def inImage(self, otherBoundingBox):
-        return False
+        return otherBoundingBox.inBox(self.boundingBox)
 
     def partInImage(self, otherBoundingBox):
-        return None
+        if not self.inImage(otherBoundingBox):
+            return None
+        return self.image[otherBoundingBox.yRange, otherBoundingBox.xRange]

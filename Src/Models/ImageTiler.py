@@ -1,8 +1,7 @@
 import math
 from collections import deque
-
 from Src.Models.ImageTile import ImageTile
-
+import numpy as np
 
 class ImageTiler(object):
     def __init__(self, map, blockXSize, blockYSize):
@@ -71,8 +70,21 @@ class ImageTiler(object):
             return self.activeTile
         raise StopIteration()
 
+    def inLoadedTiles(self, boundingBox):
+        for imageTile in self.__bufferedMaps:
+            if boundingBox.inBox(imageTile.boundingBox):
+                return True
+        return False
+
     def getImageForBoundingBox(self, boundingBox):
-        pass
+        image = np.zeros([boundingBox.height, boundingBox.width])
+        for imageTile in self.__bufferedMaps:
+            if not imageTile.inImage(boundingBox):
+                continue
+            imagePart = imageTile.partInImage(boundingBox)
+            bbox = imagePart.boundingBox
+            image[bbox.yRange, bbox.xRange] = imagePart
+        return image
 
     def getTileCoordinates(self, tileNumber):
         rowNumber = tileNumber // self.numberOfColumns
