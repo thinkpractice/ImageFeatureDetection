@@ -86,10 +86,12 @@ class ImageTilerTests(unittest.TestCase):
     def mapWithWidth(self, width):
         map = MagicMock()
         type(map).widthInPixels = PropertyMock(return_value=width)
+        type(map).heightInPixels = PropertyMock(return_value=1)
         return map
 
     def mapWithHeight(self, height):
         map = MagicMock()
+        type(map).widthInPixels = PropertyMock(return_value=1)
         type(map).heightInPixels = PropertyMock(return_value=height)
         return map
 
