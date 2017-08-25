@@ -38,4 +38,6 @@ class BoundingBox(object):
         return slice(self.topY, self.maxY + 1)
 
     def inBox(self, other):
-        return False
+        #todo check!!
+        return (other.topX >= self.topX or other.maxX <= self.maxX) and \
+               (other.topY >= self.topY or other.maxY <= self.maxY)

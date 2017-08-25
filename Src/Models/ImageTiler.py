@@ -1,5 +1,7 @@
 import math
 from collections import deque
+
+from Src.Models.BoundingBox import BoundingBox
 from Src.Models.ImageTile import ImageTile
 import numpy as np
 
@@ -95,5 +97,5 @@ class ImageTiler(object):
 
     def readImageTile(self, x, y):
         image = self.map.readTile(x, y, self.blockXSize, self.blockYSize)
-        boundingBox = (x, y, self.blockXSize, self.blockYSize)
+        boundingBox = BoundingBox([x, y, self.blockXSize, self.blockYSize])
         return ImageTile(image, boundingBox)
