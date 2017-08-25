@@ -1,7 +1,6 @@
 import unittest
-from unittest.mock import MagicMock, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, call
 from Src.Models.ImageTiler import ImageTiler
-
 
 class ImageTilerTests(unittest.TestCase):
     def setUp(self):
@@ -35,21 +34,32 @@ class ImageTilerTests(unittest.TestCase):
         self.assertEquals(4, ImageTiler(self.mapWithWidth(255), 64, 400).numberOfColumns)
         self.assertEquals(5, ImageTiler(self.mapWithWidth(257), 64, 500).numberOfColumns)
 
+    def testGetTileCoordinatesReturnsCoordinatesForTileNumber(self):
+        self.assertEquals((0,0), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(0))
+        self.assertEquals((32,0), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(1))
+        self.assertEquals((64,0), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(2))
+        self.assertEquals((0,64), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(3))
+        self.assertEquals((32,64), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(4))
+        self.assertEquals((64,64), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(5))
+
     def testImageTilerBoundingBoxInTiler(self):
         pass
 
     def testImageTilerLoadsNextTiles(self):
-        map = self.mapWith(100, 100)
-        imageTiler = ImageTiler(map, 32, 64)
+        map = self.mapWith(100, 200)
+        imageTiler = ImageTiler(map, 100, 64)
+        self.assertEquals(0, imageTiler.activeTileNumber)
         next(imageTiler)
-        map.readTile(0, 0, 32, 64)
+        map.readTile.assert_has_calls([call(0, 0, 100, 64),
+        call(0, 64, 100, 64)])
+        self.assertEquals(1, imageTiler.activeTileNumber)
         next(imageTiler)
-        map.readTile(32, 0, 32, 64)
+        map.readTile.assert_called_with(0, 128, 100, 64)
+        self.assertEquals(2, imageTiler.activeTileNumber)
         next(imageTiler)
-        map.readTile(64, 0, 32, 64)
+        map.readTile.assert_called_with(0, 192, 100, 64)
+        self.assertEquals(3, imageTiler.activeTileNumber)
         next(imageTiler)
-        map.readTile(96, 0, 4, 64)
-
 
     #Helper methods
     def mapWith(self, width, height):
