@@ -17,4 +17,5 @@ class ImageTile(object):
     def partInImage(self, otherBoundingBox):
         if not self.inImage(otherBoundingBox):
             return None
+        #TODO should only be the range of the part of the bounding box that's in the image.
         return self.image[otherBoundingBox.yRange, otherBoundingBox.xRange]

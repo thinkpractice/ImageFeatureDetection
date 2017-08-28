@@ -41,3 +41,6 @@ class BoundingBox(object):
         #todo check!!
         return (self.left >= other.left and self.right <= other.right) and \
                (self.top  >= other.top and self.bottom <= other.bottom)
+
+    def overlapsWith(self, other):
+        return False
