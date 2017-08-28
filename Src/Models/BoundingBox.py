@@ -1,17 +1,17 @@
 class BoundingBox(object):
     def __init__(self, boundingBoxArray):
-        self.__topX = boundingBoxArray[0]
-        self.__topY = boundingBoxArray[1]
+        self.__left = boundingBoxArray[0]
+        self.__top = boundingBoxArray[1]
         self.__width = boundingBoxArray[2]
         self.__height = boundingBoxArray[3]
 
     @property
-    def topX(self):
-        return self.__topX
+    def left(self):
+        return self.__left
 
     @property
-    def topY(self):
-        return self.__topY
+    def top(self):
+        return self.__top
 
     @property
     def width(self):
@@ -22,22 +22,22 @@ class BoundingBox(object):
         return self.__height
 
     @property
-    def maxX(self):
-        return self.topX + self.width
+    def right(self):
+        return self.left + self.width
 
     @property
-    def maxY(self):
-        return self.topY + self.height
+    def bottom(self):
+        return self.top + self.height
 
     @property
     def xRange(self):
-        return slice(self.topX, self.maxX+1)
+        return slice(self.left, self.right + 1)
 
     @property
     def yRange(self):
-        return slice(self.topY, self.maxY + 1)
+        return slice(self.top, self.bottom + 1)
 
     def inBox(self, other):
         #todo check!!
-        return (other.topX >= self.topX or other.maxX <= self.maxX) and \
-               (other.topY >= self.topY or other.maxY <= self.maxY)
+        return (other.left >= self.left or other.right <= self.right) and \
+               (other.top >= self.top or other.bottom <= self.bottom)
