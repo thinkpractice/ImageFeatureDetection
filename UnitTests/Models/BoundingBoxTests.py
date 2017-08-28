@@ -30,7 +30,22 @@ class BoundingBoxTests(unittest.TestCase):
         self.assertEqual(28, BoundingBox([2, 7, 11, 21]).bottom)
         self.assertEqual(30, BoundingBox([3, 8, 12, 22]).bottom)
         self.assertEqual(32, BoundingBox([4, 9, 13, 23]).bottom)
-        self.assertEqual(34, BoundingBox([5, 10, 14, 24]).bottom
+        self.assertEqual(34, BoundingBox([5, 10, 14, 24]).bottom)
+
+    def testXRangeReturnsCorrectSlice(self):
+        self.assertEqual(slice(1, 12), BoundingBox([1, 6, 10, 20]).xRange)
+        self.assertEqual(slice(2, 14), BoundingBox([2, 7, 11, 21]).xRange)
+        self.assertEqual(slice(3, 16), BoundingBox([3, 8, 12, 22]).xRange)
+        self.assertEqual(slice(4, 18), BoundingBox([4, 9, 13, 23]).xRange)
+        self.assertEqual(slice(5, 20), BoundingBox([5, 10, 14, 24]).xRange)
+
+    def testYRangeReturnsCorrectSlice(self):
+        self.assertEqual(slice(6, 27), BoundingBox([1, 6, 10, 20]).yRange)
+        self.assertEqual(slice(7, 29), BoundingBox([2, 7, 11, 21]).yRange)
+        self.assertEqual(slice(8, 31), BoundingBox([3, 8, 12, 22]).yRange)
+        self.assertEqual(slice(9, 33), BoundingBox([4, 9, 13, 23]).yRange)
+        self.assertEqual(slice(10, 35), BoundingBox([5, 10, 14, 24]).yRange)
+
 
 if __name__ == '__main__':
     unittest.main()
