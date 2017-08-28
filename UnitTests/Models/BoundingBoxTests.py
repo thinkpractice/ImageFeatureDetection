@@ -46,6 +46,19 @@ class BoundingBoxTests(unittest.TestCase):
         self.assertEqual(slice(9, 33), BoundingBox([4, 9, 13, 23]).yRange)
         self.assertEqual(slice(10, 35), BoundingBox([5, 10, 14, 24]).yRange)
 
+    def testInBoxReturnsFalseIfBoxOutsideOfOtherBox(self):
+        self.assertFalse(BoundingBox([1, 1, 2, 2]).inBox(BoundingBox([4, 4, 2, 2])))
+        self.assertFalse(BoundingBox([2, 2, 3, 5]).inBox(BoundingBox([2, 8, 3, 5])))
+        self.assertFalse(BoundingBox([0, 0, 1, 3]).inBox(BoundingBox([-2, -2, 1, 1])))
+        self.assertFalse(BoundingBox([0, 0, 1, 3]).inBox(BoundingBox([2, 0, 1, 1])))
+        self.assertFalse(BoundingBox([10, 10, 10, 30]).inBox(BoundingBox([10, 0, 5, 5])))
+
+    def testInBoxReturnsTrueIfBoxInsideOtherBox(self):
+        self.assertTrue(BoundingBox([1, 1, 2, 2]).inBox(BoundingBox([0, 0, 4, 4])))
+        self.assertTrue(BoundingBox([2, 2, 3, 5]).inBox(BoundingBox([1, 1, 10, 10])))
+        self.assertTrue(BoundingBox([0, 0, 1, 3]).inBox(BoundingBox([-2, -2, 5, 6])))
+        self.assertTrue(BoundingBox([0, 0, 1, 3]).inBox(BoundingBox([0, 0, 1, 3])))
+        self.assertTrue(BoundingBox([10, 10, 10, 30]).inBox(BoundingBox([0, 0, 50, 50])))
 
 if __name__ == '__main__':
     unittest.main()

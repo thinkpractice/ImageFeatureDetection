@@ -39,5 +39,5 @@ class BoundingBox(object):
 
     def inBox(self, other):
         #todo check!!
-        return (other.left >= self.left or other.right <= self.right) and \
-               (other.top >= self.top or other.bottom <= self.bottom)
+        return (self.left >= other.left and self.right <= other.right) and \
+               (self.top  >= other.top and self.bottom <= other.bottom)
