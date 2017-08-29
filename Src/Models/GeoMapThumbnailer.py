@@ -1,5 +1,6 @@
 from Src.Models.ImageTiler import ImageTiler
 from Src.Models.Thumbnailer import Thumbnailer
+from Src.Models.Polygon import Polygon
 from Src.Models.OSMPolygonSource import OSMPolygonSource
 from Src.Models.ShapeFilePolygonSource import ShapeFilePolygonSource
 
@@ -22,11 +23,12 @@ class GeoMapThumbnailer(object):
         return self.__exportedImages
 
     def createAllThumbnails(self):
-        self.createThumbnails(self.map.boundingBox)
+        self.createThumbnails(self.map.gpsCoordinates)
 
-    def createThumbnails(self, boundingBox):
+    def createThumbnails(self, gpsBoundingBox):
         imageTiler = ImageTiler(self.map, self.map.blockXSize, 512)
-        allPolygons = self.getAllPolygons(self.map, boundingBox)
+        allPolygons = self.getAllPolygons(self.map, gpsBoundingBox)
+        print("Starting...")
         while next(imageTiler):
             print("Processing imageTile with {}".format(imageTiler.activeTile.boundingBox))
             polygons = self.getPolygonsInImageTile(imageTiler.activeTile, allPolygons)
@@ -34,6 +36,8 @@ class GeoMapThumbnailer(object):
             exportedImagesIds = thumbnailer.writeThumbnails(polygons, imageTiler)
             for imageId in exportedImagesIds:
                 self.exportedImages[imageId] = True
+
+        print("Finished...")
 
     def getAllPolygons(self, map, boundingBox):
         polygonSource = self.getPolygonSource(map, False)
@@ -43,8 +47,8 @@ class GeoMapThumbnailer(object):
     def getPolygonsInImageTile(self, imageTile, polygons):
         return (polygon for imageId, polygon in polygons if self.doesPolygonNeedsToBeExportedForTile(imageTile, imageId, polygon))
 
-    def doesPolygonNeedsToBeExportedForTile(self, imageTile, imageId, polygon):
-        return imageTile.inImage(polygon.boundingBox) and not self.exportedImages.get(imageId, False)
+    def doesPolygonNeedsToBeExportedForTile(self, imageTile, imageId, polygonCoordinates):
+        return imageTile.inImage(Polygon(polygonCoordinates).boundingBox) and not self.exportedImages.get(imageId, False)
 
     def getPolygonSource(self, map, openStreetMap):
         if openStreetMap:

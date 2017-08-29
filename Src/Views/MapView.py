@@ -42,24 +42,23 @@ class MapView(object):
     def show(self):
         plt.show()
 
-    def drawPolygons(self, polygons, tileImage):
+    def drawPolygons(self, geoTileCollection, polygons, tileImage):
         for _, polygonArray in polygons:
-            polygon = Polygon(polygonArray)
+            polygon = Polygon(self.translatePolygons(geoTileCollection,polygonArray))
             polygon.drawInto(tileImage)
 
     def getShapeInfo(self, geoTileCollection, tileImage):
         polygonSource = self.getPolygonSource(geoTileCollection.geoMap, False)
         polygonSource.query(geoTileCollection.gpsCoordinates)
-        self.drawPolygons(self.translatePolygons(polygonSource.polygons), tileImage)
+        #self.drawPolygons(geoTileCollection, polygonSource.polygons, tileImage)
 
     def getPolygonSource(self, geoMap, openStreetMap):
         if openStreetMap:
             return OSMPolygonSource(geoMap)
         return ShapeFilePolygonSource(geoMap)
 
-    def translatePolygons(self, polygons):
-        #TODO carry out translation
-        return polygons
+    def translatePolygons(self, geoTileCollection, polygonArray):
+        return (polygonArray[0] - geoTileCollection.topX, polygonArray[1] - geoTileCollection.topY)
 
     # def retrieveWholeMapInfo(self, geoTileCollection):
     #     print("Retrieving info for whole map")
