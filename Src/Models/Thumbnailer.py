@@ -24,10 +24,9 @@ class Thumbnailer(object):
         filename = os.path.join(self.exportDirectory, "{}.png".format(imageId))
         p = Polygon(polygonArray)
         polygonImage = self.getRectangleFromImage(tileImage, p.boundingBox)
-        if polygonImage is not None:
+        if polygonImage is None:
             print("Wrong image dimensions for: {} bbox: {}".format(filename, p.boundingBox))
             return
-        print(polygonImage)
         translatedPolygonCoords = self.translateCoords(p.boundingBox, polygonArray)
         tp = Polygon(translatedPolygonCoords)
         maskedImage = tp.maskImage(polygonImage)

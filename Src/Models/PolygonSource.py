@@ -26,7 +26,7 @@ class PolygonSource(object):
         rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
         if not geoTileCollection.inMapArray(rasterCoordinates):
             return None
-        return (rasterCoordinates[1],rasterCoordinates[0])
+        return (rasterCoordinates[0],rasterCoordinates[1])
 
     def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
         gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
