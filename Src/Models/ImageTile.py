@@ -12,7 +12,7 @@ class ImageTile(object):
         return self.__boundingBox
 
     def inImage(self, otherBoundingBox):
-        return otherBoundingBox.inBox(self.boundingBox)
+        return otherBoundingBox.overlapsWith(self.boundingBox)
 
     def partInImage(self, otherBoundingBox):
         if not self.inImage(otherBoundingBox):
