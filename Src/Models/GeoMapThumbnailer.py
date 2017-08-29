@@ -24,19 +24,24 @@ class GeoMapThumbnailer(object):
     def createThumbnails(self, boundingBox):
         imageTiler = ImageTiler(self.map, self.map.blockXSize, 512)
         allPolygons = self.getAllPolygons(self.map, boundingBox)
-        for imageTile in imageTiler:
-            polygons = self.getPolygonsInImageTile(imageTile, allPolygons)
-
+        while next(imageTiler):
+            print("Processing imageTile with {}".format(imageTiler.activeTile.boundingBox))
+            polygons = self.getPolygonsInImageTile(imageTiler.activeTile, allPolygons)
             thumbnailer = Thumbnailer(self.exportDirectory)
-            thumbnailer.writeThumbnails(polygons, imageTile)
+            exportedImagesIds = thumbnailer.writeThumbnails(polygons, imageTiler)
+            for imageId in exportedImagesIds:
+                self.exportedImages[imageId] = True
 
-    def getAllPolygons(self, geoTileCollection, boundingBox):
-        polygonSource = self.getPolygonSource(geoTileCollection, False)
+    def getAllPolygons(self, map, boundingBox):
+        polygonSource = self.getPolygonSource(map, False)
         polygonSource.query(boundingBox)
         return polygonSource.polygons
 
     def getPolygonsInImageTile(self, imageTile, polygons):
-        return (polygon for polygon in polygons if imageTile.inImage(polygon.boundingBox))
+        return (polygon for imageId, polygon in polygons if self.doesPolygonNeedsToBeExportedForTile(imageTile, imageId, polygon))
+
+    def doesPolygonNeedsToBeExportedForTile(self, imageTile, imageId, polygon):
+        return imageTile.inImage(polygon.boundingBox) and not self.exportedImages.get(imageId, False)
 
     def getPolygonSource(self, map, openStreetMap):
         if openStreetMap:
