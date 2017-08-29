@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
-from skimage.draw import polygon
 from Src.Models.OSMPolygonSource import OSMPolygonSource
 from Src.Models.ShapeFilePolygonSource import ShapeFilePolygonSource
 from Src.Models.Thumbnailer import Thumbnailer
-
+from Src.Models.Polygon import Polygon
 
 def pretty(d, indent=0):
     for key, value in d.items():
@@ -45,7 +44,8 @@ class MapView(object):
 
     def drawPolygons(self, polygons, tileImage):
         for _, polygonArray in polygons:
-            self.drawPolygon(tileImage, polygonArray)
+            polygon = Polygon(polygonArray)
+            polygon.drawInto(tileImage)
 
     def getShapeInfo(self, geoTileCollection, tileImage):
         polygonSource = self.getPolygonSource(geoTileCollection, False)
@@ -79,11 +79,4 @@ class MapView(object):
     #             print("    Lat: %f, Lon: %f" % (node.lat, node.lon))
     #     print("Number of ways: {}, number of nodes: {}".format(numberOfWays, numberOfNodes))
 
-    def getPolygonFromCoords(self, polygonArray):
-        xCoords, yCoords = polygonArray
-        rr, cc = polygon(xCoords, yCoords)
-        return rr, cc
 
-    def drawPolygon(self, tileImage, polygonArray):
-        rr, cc = self.getPolygonFromCoords(polygonArray)
-        tileImage[rr, cc] = (0,0,255)

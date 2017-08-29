@@ -1,8 +1,7 @@
-from skimage.io import imsave
-from skimage.draw import polygon
-import numpy as np
 import os
 import time
+from skimage.io import imsave
+from Src.Models.Polygon import Polygon
 
 class Thumbnailer(object):
     def __init__(self, exportDirectory):
@@ -30,41 +29,19 @@ class Thumbnailer(object):
             return
 
         translatedPolygonCoords = self.translateCoords(boundingRect, polygonArray)
-        maskedImage = self.maskImageWithPolygon(polygonImage, translatedPolygonCoords)
+        p = Polygon(translatedPolygonCoords)
+        maskedImage = p.maskImage(polygonImage)
 
         print("Writing maskedImage: {} bbox: {}".format(filename, boundingRect))
         imsave(filename, maskedImage)
 
-    def maskImageWithPolygon(self, polygonImage, translatedPolygonCoords):
-        rr, cc = self.getPolygonFromCoords(translatedPolygonCoords)
-        maskedImage = polygonImage.copy()
-        imageMask = np.zeros([maskedImage.shape[0], maskedImage.shape[1]], dtype=np.uint8)
-        imageMask[rr, cc] = 1
-        imageMask = imageMask != 1
-        maskedImage[imageMask] = (0, 0, 0)
-        return maskedImage
-
-    def getPolygonFromCoords(self, polygonArray):
-        xCoords, yCoords = polygonArray
-        rr, cc = polygon(xCoords, yCoords)
-        return rr, cc
-
     def translateCoords(self, boundingRect, polygonArray):
         xCoords, yCoords = polygonArray
-        translatedXCoords = xCoords - boundingRect[0] - 1
-        translatedYCoords = yCoords - boundingRect[1] - 1
+        translatedXCoords = xCoords - boundingRect.left - 1
+        translatedYCoords = yCoords - boundingRect.top - 1
         return translatedXCoords, translatedYCoords
 
-    def getBoundingBox(self, polygonArray):
-        xCoords, yCoords = polygonArray
-        return (int(round(xCoords.min())), int(round(yCoords.min())), int(round(xCoords.max())), int(round(yCoords.max())))
-
     def getRectangleFromImage(self, image, boundingRect):
-        minX = boundingRect[0]
-        minY = boundingRect[1]
-        maxX = boundingRect[2]
-        maxY = boundingRect[3]
-        if minX == maxX or minY == maxY:
+        if boundingRect.width == 0 or boundingRect.height == 0:
             return None
-
-        return image[minX:maxX, minY:maxY, :]
+        return image[boundingRect.yRange, boundingRect.xRange, :]
