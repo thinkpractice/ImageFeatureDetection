@@ -20,4 +20,5 @@ class ImageTile(object):
         boundingBoxForOverlap = otherBoundingBox.overlap(self.boundingBox)
         boundingBoxForOverlap.left -= self.boundingBox.left
         boundingBoxForOverlap.top -= self.boundingBox.top
-        return self.image[boundingBoxForOverlap.yRange, boundingBoxForOverlap.xRange]
+        image = self.image[boundingBoxForOverlap.yRange, boundingBoxForOverlap.xRange]
+        return ImageTile(image, boundingBoxForOverlap)

@@ -19,26 +19,26 @@ class ImageTileTests(unittest.TestCase):
                            [0,1,1]])
         imageTile1 = self.imageTileWithImage(self.boundingBoxWith(0, 0, 3, 3), image1)
         subTile1 = imageTile1.partInImage(self.boundingBoxWith(1, 1, 2, 2))
-        self.assertTrue(np.all(np.array([[1,1], [1,1]]) == subTile1))
+        self.assertTrue(np.all(np.array([[1,1], [1,1]]) == subTile1.image))
 
         imageTile2 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image1)
         subTile2 = imageTile2.partInImage(self.boundingBoxWith(4, 4, 2, 2))
-        self.assertTrue(np.all(np.array([[1, 1], [1, 1]]) == subTile2))
+        self.assertTrue(np.all(np.array([[1, 1], [1, 1]]) == subTile2.image))
 
         imageTile3 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image1)
         subTile3 = imageTile3.partInImage(self.boundingBoxWith(5, 4, 2, 2))
-        self.assertTrue(np.all(np.array([[1], [1]]) == subTile3))
+        self.assertTrue(np.all(np.array([[1], [1]]) == subTile3.image))
 
         imageTile4 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image1)
         subTile4 = imageTile4.partInImage(self.boundingBoxWith(4, 5, 2, 2))
-        self.assertTrue(np.all(np.array([[1], [1]]) == subTile4))
+        self.assertTrue(np.all(np.array([[1], [1]]) == subTile4.image))
 
         image2 = np.array([[1, 1, 0],
                           [1, 1, 0],
                           [0, 0, 0]])
         imageTile5 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image2)
         subTile5 = imageTile5.partInImage(self.boundingBoxWith(2, 3, 2, 2))
-        self.assertTrue(np.all(np.array([[1], [1]]) == subTile5))
+        self.assertTrue(np.all(np.array([[1], [1]]) == subTile5.image))
 
     #Helper methods
     def boundingBoxWith(self, left, right, width, height):

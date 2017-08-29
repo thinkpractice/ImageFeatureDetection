@@ -8,10 +8,10 @@ from Src.Views.MapView import MapView
 class App(object):
     def main(self):
         geoMap = GeoMap.open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Parkstad.tif")
-        geoTileCollection = GeoTileCollection(geoMap)
+        #geoTileCollection = GeoTileCollection(geoMap)
 
-        mapView = MapView()
-        self.controller = GeoMapTileController(geoTileCollection, mapView)
+        #mapView = MapView()
+        #self.controller = GeoMapTileController(geoTileCollection, mapView)
         print("width={}, height={}".format(geoMap.widthInPixels, geoMap.heightInPixels))
 
         self.geoMapThumbnailer = GeoMapThumbnailer(geoMap)

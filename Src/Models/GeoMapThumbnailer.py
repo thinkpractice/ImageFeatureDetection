@@ -45,7 +45,7 @@ class GeoMapThumbnailer(object):
         return polygonSource.polygons
 
     def getPolygonsInImageTile(self, imageTile, polygons):
-        return (polygon for imageId, polygon in polygons if self.doesPolygonNeedsToBeExportedForTile(imageTile, imageId, polygon))
+        return ((imageId, polygon) for imageId, polygon in polygons if self.doesPolygonNeedsToBeExportedForTile(imageTile, imageId, polygon))
 
     def doesPolygonNeedsToBeExportedForTile(self, imageTile, imageId, polygonCoordinates):
         return imageTile.inImage(Polygon(polygonCoordinates).boundingBox) and not self.exportedImages.get(imageId, False)
