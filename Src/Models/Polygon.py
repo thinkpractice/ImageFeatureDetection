@@ -14,10 +14,10 @@ class Polygon(object):
     def boundingBox(self):
         xCoords, yCoords = self.points
         minX = int(round(xCoords.min()))
-        maxX = int(round(yCoords.max()))
+        maxX = int(round(xCoords.max()))
         minY = int(round(yCoords.min()))
-        maxY = int(round(xCoords.max()))
-        return BoundingBox([minX, minY, maxX-minX, maxY-minY])
+        maxY = int(round(yCoords.max()))
+        return BoundingBox([minX, minY, maxX-minX+1, maxY-minY+1])
 
     @property
     def polygonMask(self):
@@ -25,7 +25,7 @@ class Polygon(object):
         return polygon(yCoords, xCoords)
 
     def drawInto(self, tileImage):
-        rr, cc = self.polygonMask()
+        rr, cc = self.polygonMask
         tileImage[rr, cc] = (0, 0, 255)
 
     def maskImage(self, polygonImage):

@@ -22,17 +22,17 @@ class Thumbnailer(object):
 
     def writeThumbnail(self, imageId, polygonArray, tileImage):
         filename = os.path.join(self.exportDirectory, "{}.png".format(imageId))
-        boundingRect = self.getBoundingBox(polygonArray)
-        polygonImage = self.getRectangleFromImage(tileImage, boundingRect)
-        if polygonImage is None:
-            print("Wrong image dimensions for: {} bbox: {}".format(filename, boundingRect))
+        p = Polygon(polygonArray)
+        polygonImage = self.getRectangleFromImage(tileImage, p.boundingBox)
+        if polygonImage is not None:
+            print("Wrong image dimensions for: {} bbox: {}".format(filename, p.boundingBox))
             return
+        print(polygonImage)
+        translatedPolygonCoords = self.translateCoords(p.boundingBox, polygonArray)
+        tp = Polygon(translatedPolygonCoords)
+        maskedImage = tp.maskImage(polygonImage)
 
-        translatedPolygonCoords = self.translateCoords(boundingRect, polygonArray)
-        p = Polygon(translatedPolygonCoords)
-        maskedImage = p.maskImage(polygonImage)
-
-        print("Writing maskedImage: {} bbox: {}".format(filename, boundingRect))
+        print("Writing maskedImage: {} bbox: {}".format(filename, p.boundingBox))
         imsave(filename, maskedImage)
 
     def translateCoords(self, boundingRect, polygonArray):
