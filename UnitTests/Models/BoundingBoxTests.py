@@ -79,7 +79,7 @@ class BoundingBoxTests(unittest.TestCase):
         self.assertEquals(BoundingBox([2, 2, 3, 5]), BoundingBox([2, 2, 3, 5]).overlap(BoundingBox([1, 1, 10, 10])))
         self.assertEquals(BoundingBox([0, 0, 1, 3]), BoundingBox([0, 0, 1, 3]).overlap(BoundingBox([-2, -2, 3, 6])))
         self.assertEquals(BoundingBox([1, 3, 0, 0]), BoundingBox([0, 0, 1, 3]).overlap(BoundingBox([1, 3, 1, 1])))
-        self.assertEquals(BoundingBox([10, 10, 14, 14]), BoundingBox([10, 10, 10, 30]).overlap(BoundingBox([9, 9, 5, 5])))
+        self.assertEquals(BoundingBox([10, 10, 4, 4]), BoundingBox([10, 10, 10, 30]).overlap(BoundingBox([9, 9, 5, 5])))
 
 if __name__ == '__main__':
     unittest.main()

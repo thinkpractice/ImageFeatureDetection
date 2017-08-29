@@ -43,6 +43,9 @@ class BoundingBox(object):
     def __str__(self):
         return "bbox({},{},{},{})".format(self.left, self.top, self.width, self.height)
 
+    def __repr__(self):
+        return self.__str__()
+
     def inBox(self, other):
         #todo check!!
         return (self.left >= other.left and self.right <= other.right) and \
