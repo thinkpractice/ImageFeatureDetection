@@ -1,5 +1,6 @@
 from gdalconst import *
 from Src.Models.GeoTransform import GeoTransform
+from Src.Models.BoundingBox import BoundingBox
 import gdal
 import numpy
 
@@ -36,6 +37,10 @@ class GeoMap(object):
         :rtype: int
         """
         return self.dataset.RasterYSize
+
+    @property
+    def boundingBox(self):
+        return BoundingBox([0, 0, self.widthInPixels, self.heightInPixels])
 
     @property
     def blockXSize(self):

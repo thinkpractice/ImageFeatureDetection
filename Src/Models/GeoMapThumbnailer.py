@@ -21,6 +21,9 @@ class GeoMapThumbnailer(object):
     def exportedImages(self):
         return self.__exportedImages
 
+    def createAllThumbnails(self):
+        self.createThumbnails(self.map.boundingBox)
+
     def createThumbnails(self, boundingBox):
         imageTiler = ImageTiler(self.map, self.map.blockXSize, 512)
         allPolygons = self.getAllPolygons(self.map, boundingBox)
