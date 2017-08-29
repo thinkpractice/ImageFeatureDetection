@@ -9,17 +9,33 @@ class BoundingBox(object):
     def left(self):
         return self.__left
 
+    @left.setter
+    def left(self, value):
+        self.__left = value
+
     @property
     def top(self):
         return self.__top
+
+    @top.setter
+    def top(self, value):
+        self.__top = value
 
     @property
     def width(self):
         return self.__width
 
+    @width.setter
+    def width(self, value):
+        self.__width = value
+
     @property
     def height(self):
         return self.__height
+
+    @height.setter
+    def height(self, value):
+        self.__height = value
 
     @property
     def right(self):
