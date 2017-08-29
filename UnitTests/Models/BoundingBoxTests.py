@@ -33,18 +33,18 @@ class BoundingBoxTests(unittest.TestCase):
         self.assertEqual(34, BoundingBox([5, 10, 14, 24]).bottom)
 
     def testXRangeReturnsCorrectSlice(self):
-        self.assertEqual(slice(1, 12), BoundingBox([1, 6, 10, 20]).xRange)
-        self.assertEqual(slice(2, 14), BoundingBox([2, 7, 11, 21]).xRange)
-        self.assertEqual(slice(3, 16), BoundingBox([3, 8, 12, 22]).xRange)
-        self.assertEqual(slice(4, 18), BoundingBox([4, 9, 13, 23]).xRange)
-        self.assertEqual(slice(5, 20), BoundingBox([5, 10, 14, 24]).xRange)
+        self.assertEqual(slice(1, 11), BoundingBox([1, 6, 10, 20]).xRange)
+        self.assertEqual(slice(2, 13), BoundingBox([2, 7, 11, 21]).xRange)
+        self.assertEqual(slice(3, 15), BoundingBox([3, 8, 12, 22]).xRange)
+        self.assertEqual(slice(4, 17), BoundingBox([4, 9, 13, 23]).xRange)
+        self.assertEqual(slice(5, 19), BoundingBox([5, 10, 14, 24]).xRange)
 
     def testYRangeReturnsCorrectSlice(self):
-        self.assertEqual(slice(6, 27), BoundingBox([1, 6, 10, 20]).yRange)
-        self.assertEqual(slice(7, 29), BoundingBox([2, 7, 11, 21]).yRange)
-        self.assertEqual(slice(8, 31), BoundingBox([3, 8, 12, 22]).yRange)
-        self.assertEqual(slice(9, 33), BoundingBox([4, 9, 13, 23]).yRange)
-        self.assertEqual(slice(10, 35), BoundingBox([5, 10, 14, 24]).yRange)
+        self.assertEqual(slice(6, 26), BoundingBox([1, 6, 10, 20]).yRange)
+        self.assertEqual(slice(7, 28), BoundingBox([2, 7, 11, 21]).yRange)
+        self.assertEqual(slice(8, 30), BoundingBox([3, 8, 12, 22]).yRange)
+        self.assertEqual(slice(9, 32), BoundingBox([4, 9, 13, 23]).yRange)
+        self.assertEqual(slice(10, 34), BoundingBox([5, 10, 14, 24]).yRange)
 
     def testInBoxReturnsFalseIfBoxOutsideOfOtherBox(self):
         self.assertFalse(BoundingBox([1, 1, 2, 2]).inBox(BoundingBox([4, 4, 2, 2])))

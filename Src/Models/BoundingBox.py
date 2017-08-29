@@ -47,11 +47,11 @@ class BoundingBox(object):
 
     @property
     def xRange(self):
-        return slice(self.left, self.right + 1)
+        return slice(self.left, self.right)
 
     @property
     def yRange(self):
-        return slice(self.top, self.bottom + 1)
+        return slice(self.top, self.bottom)
 
     def __eq__(self, other):
         return self.left == other.left and self.right == other.right and self.top == other.top and self.bottom == other.bottom
@@ -63,9 +63,8 @@ class BoundingBox(object):
         return self.__str__()
 
     def inBox(self, other):
-        #todo check!!
         return (self.left >= other.left and self.right <= other.right) and \
-               (self.top  >= other.top and self.bottom <= other.bottom)
+               (self.top >= other.top and self.bottom <= other.bottom)
 
     def overlapsWith(self, other):
         return self.overlap(other) is not None

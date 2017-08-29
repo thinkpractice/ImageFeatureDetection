@@ -21,11 +21,11 @@ class ImageTileTests(unittest.TestCase):
         subTile1 = imageTile1.partInImage(self.boundingBoxWith(1, 1, 2, 2))
         self.assertTrue(np.all(np.array([[1,1], [1,1]]) == subTile1))
 
-        imageTile2 = self.imageTileWithImage(self.boundingBoxWith(3,3,3,3), image1)
+        imageTile2 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image1)
         subTile2 = imageTile2.partInImage(self.boundingBoxWith(4, 4, 2, 2))
         self.assertTrue(np.all(np.array([[1, 1], [1, 1]]) == subTile2))
 
-        imageTile3 = self.imageTileWithImage(self.boundingBoxWith(3,3,3,3), image1)
+        imageTile3 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image1)
         subTile3 = imageTile3.partInImage(self.boundingBoxWith(5, 4, 2, 2))
         self.assertTrue(np.all(np.array([[1], [1]]) == subTile3))
 
@@ -38,7 +38,6 @@ class ImageTileTests(unittest.TestCase):
                           [0, 0, 0]])
         imageTile5 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image2)
         subTile5 = imageTile5.partInImage(self.boundingBoxWith(2, 3, 2, 2))
-        print(subTile5)
         self.assertTrue(np.all(np.array([[1], [1]]) == subTile5))
 
     #Helper methods

@@ -18,8 +18,6 @@ class ImageTile(object):
         if not self.inImage(otherBoundingBox):
             return None
         boundingBoxForOverlap = otherBoundingBox.overlap(self.boundingBox)
-        print(boundingBoxForOverlap)
-        boundingBoxForOverlap.left -= min(self.boundingBox.left, otherBoundingBox.left)
-        boundingBoxForOverlap.top -= min(self.boundingBox.top, otherBoundingBox.top)
-        print(boundingBoxForOverlap)
+        boundingBoxForOverlap.left -= self.boundingBox.left
+        boundingBoxForOverlap.top -= self.boundingBox.top
         return self.image[boundingBoxForOverlap.yRange, boundingBoxForOverlap.xRange]
