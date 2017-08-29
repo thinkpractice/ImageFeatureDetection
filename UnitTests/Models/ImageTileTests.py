@@ -11,6 +11,7 @@ class ImageTileTests(unittest.TestCase):
         self.assertTrue(self.imageTileWith(-2, -2, 3, 6).inImage(BoundingBox([0, 0, 1, 3])))
         self.assertTrue(self.imageTileWith(1, 3, 1,1).inImage(BoundingBox([0, 0, 1, 3])))
         self.assertTrue(self.imageTileWith(9, 9, 5, 5).inImage(BoundingBox([10, 10, 10, 30])))
+        self.assertTrue(self.imageTileWith(3, 3, 3, 3).inImage(BoundingBox([2, 3, 2, 2])))
 
     def testPartInImageReturnsSubsetOfImage(self):
         image1 = np.array([[0,0,0],
@@ -31,6 +32,14 @@ class ImageTileTests(unittest.TestCase):
         imageTile4 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image1)
         subTile4 = imageTile4.partInImage(self.boundingBoxWith(4, 5, 2, 2))
         self.assertTrue(np.all(np.array([[1], [1]]) == subTile4))
+
+        image2 = np.array([[1, 1, 0],
+                          [1, 1, 0],
+                          [0, 0, 0]])
+        imageTile5 = self.imageTileWithImage(self.boundingBoxWith(3, 3, 3, 3), image2)
+        subTile5 = imageTile5.partInImage(self.boundingBoxWith(2, 3, 2, 2))
+        print(subTile5)
+        self.assertTrue(np.all(np.array([[1], [1]]) == subTile5))
 
     #Helper methods
     def boundingBoxWith(self, left, right, width, height):
