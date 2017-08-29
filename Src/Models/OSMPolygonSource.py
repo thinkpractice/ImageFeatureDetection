@@ -4,12 +4,12 @@ from Src.Models.PolygonSource import PolygonSource
 
 
 class OSMPolygonSource(PolygonSource):
-    def __init__(self, geoTileCollection):
-        super().__init__(geoTileCollection)
+    def __init__(self, geoMap):
+        super().__init__(geoMap)
 
     def query(self, gpsBoundingBox):
         results = self.performMapQuery(gpsBoundingBox)
-        self.polygons = self.getPolygonsFor(self.geoTileCollection, results.ways)
+        self.polygons = self.getPolygonsFor(results.ways)
 
     def performMapQuery(self, gpsBoundary):
         overApi = overpy.Overpass()
@@ -22,10 +22,10 @@ class OSMPolygonSource(PolygonSource):
         result = overApi.query(query)
         return result
 
-    def getPolygonsFor(self, geoTileCollection, ways):
+    def getPolygonsFor(self, ways):
         for way in ways:
             imageId = way.id
-            polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection,[[node.lon, node.lat] for node in way.nodes])
+            polygonCoordinates = self.getPolygonCoordinatesFromList([[node.lon, node.lat] for node in way.nodes])
             if not polygonCoordinates:
                 continue
             yield imageId, polygonCoordinates

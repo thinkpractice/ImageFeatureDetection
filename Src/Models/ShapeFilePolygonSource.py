@@ -2,8 +2,8 @@ from Src.Models.PolygonSource import PolygonSource
 import shapefile
 
 class ShapeFilePolygonSource(PolygonSource):
-    def __init__(self, geoTileCollection):
-        super().__init__(geoTileCollection)
+    def __init__(self, geoMap):
+        super().__init__(geoMap)
 
     def query(self, gpsBoundingBox):
         buildings = []
@@ -12,16 +12,16 @@ class ShapeFilePolygonSource(PolygonSource):
             shapeBoundingBox = buildingShape.shape.bbox
             if self.withinBox(shapeBoundingBox, gpsBoundingBox):
                 buildings.append(buildingShape)
-        self.polygons = self.getPolygonsFor(self.geoTileCollection, buildings)
+        self.polygons = self.getPolygonsFor(buildings)
 
     def withinBox(self, shapeBbox, gpsBbox):
         return (shapeBbox[0] > gpsBbox[0] or shapeBbox[2] < gpsBbox[2]) and \
                 (shapeBbox[1] > gpsBbox[1] or shapeBbox[3] < gpsBbox[3])
 
-    def getPolygonsFor(self, geoTileCollection, buildings):
+    def getPolygonsFor(self, buildings):
         for building in buildings:
             imageId = building.record[0]
-            polygonCoordinates = self.getPolygonCoordinatesFromList(geoTileCollection,[[node[0], node[1]] for node in building.shape.points])
+            polygonCoordinates = self.getPolygonCoordinatesFromList([[node[0], node[1]] for node in building.shape.points])
             if not polygonCoordinates:
                 continue
             yield imageId, polygonCoordinates

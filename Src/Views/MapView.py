@@ -48,19 +48,18 @@ class MapView(object):
             polygon.drawInto(tileImage)
 
     def getShapeInfo(self, geoTileCollection, tileImage):
-        polygonSource = self.getPolygonSource(geoTileCollection, False)
-
+        polygonSource = self.getPolygonSource(geoTileCollection.geoMap, False)
         polygonSource.query(geoTileCollection.gpsCoordinates)
-        thumbnailer = Thumbnailer(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Images")
-        thumbnailer.writeThumbnails(polygonSource.polygons, tileImage)
+        self.drawPolygons(self.translatePolygons(polygonSource.polygons), tileImage)
 
-        polygonSource.query(geoTileCollection.gpsCoordinates)
-        self.drawPolygons(polygonSource.polygons, tileImage)
-
-    def getPolygonSource(self, geoTileCollection, openStreetMap):
+    def getPolygonSource(self, geoMap, openStreetMap):
         if openStreetMap:
-            return OSMPolygonSource(geoTileCollection)
-        return ShapeFilePolygonSource(geoTileCollection)
+            return OSMPolygonSource(geoMap)
+        return ShapeFilePolygonSource(geoMap)
+
+    def translatePolygons(self, polygons):
+        #TODO carry out translation
+        return polygons
 
     # def retrieveWholeMapInfo(self, geoTileCollection):
     #     print("Retrieving info for whole map")

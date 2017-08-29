@@ -38,6 +38,14 @@ class GeoMap(object):
         return self.dataset.RasterYSize
 
     @property
+    def blockXSize(self):
+        return self.dataset.GetRasterBand(1).GetBlockSize()[0]
+
+    @property
+    def blockYSize(self):
+        return self.dataset.GetRasterBand(1).GetBlockSize()[1]
+
+    @property
     def geoTransform(self):
         transform = self.dataset.GetGeoTransform()
         return GeoTransform(transform)

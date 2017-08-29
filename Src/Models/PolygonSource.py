@@ -2,9 +2,9 @@ import numpy as np
 
 
 class PolygonSource(object):
-    def __init__(self, geoTileCollection):
+    def __init__(self, geoMap):
         self.__polygons = []
-        self.__geoTileCollection = geoTileCollection
+        self.__geoMap = geoMap
 
     @property
     def polygons(self):
@@ -15,19 +15,17 @@ class PolygonSource(object):
         self.__polygons = value
 
     @property
-    def geoTileCollection(self):
-        return self.__geoTileCollection
+    def geoMap(self):
+        return self.__geoMap
 
     def query(self, gpsBoundingBox):
         pass
 
-    def getPolygonCoordinatesFromList(self, geoTileCollection, gpsCoordinates):
+    def getPolygonCoordinatesFromList(self, gpsCoordinates):
         geoCoordinates = np.array(gpsCoordinates)
-        rasterCoordinates = self.getRasterCoordinatesFromGps(geoTileCollection, geoCoordinates)
-        if not geoTileCollection.inMapArray(rasterCoordinates):
-            return None
-        return (rasterCoordinates[0],rasterCoordinates[1])
+        rasterCoordinates = self.getRasterCoordinatesFromGps(geoCoordinates)
+        return (rasterCoordinates[0], rasterCoordinates[1])
 
-    def getRasterCoordinatesFromGps(self, geoTileCollection, geoCoordinates):
-        gps = geoTileCollection.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
-        return gps[0] - geoTileCollection.topX, gps[1] - geoTileCollection.topY
+    def getRasterCoordinatesFromGps(self, geoCoordinates):
+        gps = self.geoMap.geoTransform.getRasterCoordsFromGps(geoCoordinates)
+        return gps[0], gps[1]
