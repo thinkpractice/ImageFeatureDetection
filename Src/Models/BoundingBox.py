@@ -37,10 +37,27 @@ class BoundingBox(object):
     def yRange(self):
         return slice(self.top, self.bottom + 1)
 
+    def __eq__(self, other):
+        return self.left == other.left and self.right == other.right and self.top == other.top and self.bottom == other.bottom
+
+    def __str__(self):
+        return "bbox({},{},{},{})".format(self.left, self.top, self.width, self.height)
+
     def inBox(self, other):
         #todo check!!
         return (self.left >= other.left and self.right <= other.right) and \
                (self.top  >= other.top and self.bottom <= other.bottom)
 
     def overlapsWith(self, other):
-        return False
+        return self.overlap(other) is not None
+
+    def overlap(self, other):
+        left = max(self.left, other.left)
+        right = min(self.right, other.right)
+        top = max(self.top, other.top)
+        bottom = min(self.bottom, other.bottom)
+        width = right-left
+        height = bottom-top
+        if width < 0 or height < 0:
+            return None
+        return BoundingBox([left, top, width, height])

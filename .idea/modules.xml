@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ImageFeatureDetection.iml" filepath="$PROJECT_DIR$/.idea/ImageFeatureDetection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ZonnePanelen.iml" filepath="$PROJECT_DIR$/.idea/ZonnePanelen.iml" />
     </modules>
   </component>
 </project>
