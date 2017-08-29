@@ -85,7 +85,7 @@ class ImageTiler(object):
                 continue
             imagePart = imageTile.partInImage(boundingBox)
             bbox = imagePart.boundingBox
-            image[bbox.yRange, bbox.xRange] = imagePart
+            image[bbox.yRange, bbox.xRange] = imagePart.image
         return image
 
     def getTileCoordinates(self, tileNumber):
