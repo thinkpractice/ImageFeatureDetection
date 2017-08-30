@@ -9,6 +9,7 @@ class OSMPolygonSource(PolygonSource):
 
     def query(self, gpsBoundingBox):
         results = self.performMapQuery(gpsBoundingBox)
+        self.numberOfPolygons = len(results.ways)
         self.polygons = self.getPolygonsFor(results.ways)
 
     def performMapQuery(self, gpsBoundary):

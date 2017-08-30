@@ -5,6 +5,7 @@ class PolygonSource(object):
     def __init__(self, geoMap):
         self.__polygons = []
         self.__geoMap = geoMap
+        self.__numberOfPolygons = 0
 
     @property
     def polygons(self):
@@ -13,6 +14,14 @@ class PolygonSource(object):
     @polygons.setter
     def polygons(self, value):
         self.__polygons = value
+
+    @property
+    def numberOfPolygons(self):
+        return self.__numberOfPolygons
+
+    @numberOfPolygons.setter
+    def numberOfPolygons(self, value):
+        self.__numberOfPolygons = value
 
     @property
     def geoMap(self):

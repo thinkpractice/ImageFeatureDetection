@@ -82,11 +82,11 @@ class GeoMap(object):
         dataset = gdal.Open(filename, GA_ReadOnly)
         return GeoMap(dataset)
 
-    def readTile(self, startX, startY, width, height):
+    def readTile(self, x, y, width, height):
         """Reads a tile from the map of a size specified by the method parameters
 
-        :param int startX: the x position of the topleft corner of the tile in pixels
-        :param int startY: the y position of the topleft corner of the tile in pixels
+        :param int x: the x position of the topleft corner of the tile in pixels
+        :param int y: the y position of the topleft corner of the tile in pixels
         :param int width: the width of the tile in pixels
         :param int height: the height of the tile in pixels
 
@@ -98,11 +98,15 @@ class GeoMap(object):
         G = self.dataset.GetRasterBand(2)
         B = self.dataset.GetRasterBand(3)
 
-        print("readTile({},{},{},{})".format(startX, startY, width, height))
+        startX = x
+        startY = y
+        tileWidth = min(width, self.widthInPixels - x)
+        tileHeight = min(height, self.heightInPixels - y)
+        print("readTile({},{},{},{})".format(startX, startY, tileWidth, tileHeight))
 
-        redArray = R.ReadAsArray(xoff=startX, yoff=startY, win_xsize=width, win_ysize=height)
-        greenArray = G.ReadAsArray(xoff=startX, yoff=startY, win_xsize=width, win_ysize=height)
-        blueArray = B.ReadAsArray(xoff=startX, yoff=startY, win_xsize=width, win_ysize=height)
+        redArray = R.ReadAsArray(xoff=startX, yoff=startY, win_xsize=tileWidth, win_ysize=tileHeight)
+        greenArray = G.ReadAsArray(xoff=startX, yoff=startY, win_xsize=tileWidth, win_ysize=tileHeight)
+        blueArray = B.ReadAsArray(xoff=startX, yoff=startY, win_xsize=tileWidth, win_ysize=tileHeight)
 
         redArray = numpy.expand_dims(redArray, axis=2)
         greenArray = numpy.expand_dims(greenArray, axis=2)
