@@ -35,7 +35,7 @@ class Thumbnailer(object):
             return False
         translatedPolygonCoords = self.translateCoords(p.boundingBox, polygonArray)
         tp = Polygon(translatedPolygonCoords)
-        maskedImage = tp.maskImage(polygonImage.image)
+        maskedImage = tp.maskImage(polygonImage)
 
         print("Writing maskedImage: {} bbox: {}".format(filename, p.boundingBox))
         imsave(filename, maskedImage)

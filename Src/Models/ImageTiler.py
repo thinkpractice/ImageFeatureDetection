@@ -79,13 +79,13 @@ class ImageTiler(object):
         return False
 
     def getImageForBoundingBox(self, boundingBox):
-        image = np.zeros([boundingBox.height, boundingBox.width])
+        image = np.zeros([boundingBox.height, boundingBox.width, 3], dtype=np.uint8)
         for imageTile in self.__bufferedMaps:
             if not imageTile.inImage(boundingBox):
                 continue
             imagePart = imageTile.partInImage(boundingBox)
             bbox = imagePart.boundingBox
-            image[bbox.yRange, bbox.xRange] = imagePart.image
+            image[0:bbox.height, 0:bbox.width, :] = imagePart.image
         return image
 
     def getTileCoordinates(self, tileNumber):

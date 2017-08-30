@@ -26,7 +26,7 @@ class GeoMapThumbnailer(object):
         self.createThumbnails(self.map.gpsCoordinates)
 
     def createThumbnails(self, gpsBoundingBox):
-        imageTiler = ImageTiler(self.map, self.map.blockXSize, 512)
+        imageTiler = ImageTiler(self.map, self.map.blockXSize, 256)
         allPolygons = self.getAllPolygons(self.map, gpsBoundingBox)
         print("Starting...")
         while next(imageTiler):
