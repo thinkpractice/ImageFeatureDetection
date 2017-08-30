@@ -24,13 +24,15 @@ class GenerateTrainingData(object):
         addressShapes = shapefile.Reader(self.addressShapeFile)
         addressLookup = self.generatePositivesLookup(self.addressPositives)
         positivesPath = os.path.join(self.imageFolder, "Positives")
-        os.mkdir(positivesPath)
+
+        self.createDir(positivesPath)
         negativesPath = os.path.join(self.imageFolder, "Negatives")
-        os.mkdir(negativesPath)
+        self.createDir(negativesPath)
         for addressRecord in addressShapes.iterRecords():
             address, buildingNumber = self.getRecordInfo(addressRecord)
             imagePath = self.filePathFor(buildingNumber)
             if not os.path.exists(imagePath):
+                print("Not available {}".format(imagePath))
                 continue
 
             imageFilename = self.imageNameFor(buildingNumber)
@@ -53,12 +55,27 @@ class GenerateTrainingData(object):
         path = os.path.join(self.imageFolder, filename)
         return path
 
+    def createDir(self, path):
+        if os.path.exists(path):
+            return
+        os.mkdir(path)
+
     def imageNameFor(self, buildingNumber):
         return "{}.png".format(buildingNumber)
 
     def getAddressFromLookup(self, row):
-        return (row["pc6"],row["huisnr"])
+        #TODO
+        address = (row["pc6"].lower(), row["huisnr"])
+        return address
 
     def getRecordInfo(self, addressRecord):
         #TODO houdt nog geen rekening met huisnummer letter of toevoegingen
-        return (addressRecord[-9], addressRecord[6]),  addressRecord[-3]
+        recordInfo = (addressRecord[-9].lower(), str(addressRecord[6])), addressRecord[-3]
+        return recordInfo
+
+def main():
+    generateTrainingData = GenerateTrainingData(r'/home/tjadejong/Documents/CBS/ZonnePanelen/Images', r'/home/tjadejong/Documents/CBS/ZonnePanelen/Shapes/num_parkstad_wgs84', r'/home/tjadejong/Documents/CBS/ZonnePanelen/ArcGis_zonnepanelen_zonderbtwnr2.csv')
+    generateTrainingData.generateTrainingSet()
+
+if __name__ == "__main__":
+    main()
