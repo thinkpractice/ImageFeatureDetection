@@ -46,6 +46,7 @@ class GenerateTrainingData(object):
         with open(filename, "r") as positivesFile:
             csvReader = csv.DictReader(positivesFile, delimiter=",")
             for row in csvReader:
+                #TODO filter out rows after 2016 (as our image is from summer 2016)
                 keyTuple = self.getAddressFromLookup(row)
                 lookup.add(keyTuple)
         return lookup
@@ -64,7 +65,6 @@ class GenerateTrainingData(object):
         return "{}.png".format(buildingNumber)
 
     def getAddressFromLookup(self, row):
-        #TODO
         address = (row["pc6"].lower(), row["huisnr"])
         return address
 
