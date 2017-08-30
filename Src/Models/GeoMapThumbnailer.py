@@ -3,6 +3,7 @@ from Src.Models.Thumbnailer import Thumbnailer
 from Src.Models.Polygon import Polygon
 from Src.Models.OSMPolygonSource import OSMPolygonSource
 from Src.Models.ShapeFilePolygonSource import ShapeFilePolygonSource
+import time
 
 class GeoMapThumbnailer(object):
     def __init__(self, map):
@@ -30,6 +31,7 @@ class GeoMapThumbnailer(object):
         numberOfPolygons, allPolygons = self.getAllPolygons(self.map, gpsBoundingBox)
         print("Starting...")
         numberOfExportedPolygons = 0
+        startTime = time.time()
         for _ in imageTiler:
             print("Processing imageTile with {}".format(imageTiler.activeTile.boundingBox))
             polygons = self.getPolygonsInImageTile(imageTiler.activeTile, allPolygons)
@@ -38,7 +40,8 @@ class GeoMapThumbnailer(object):
             for imageId in exportedImagesIds:
                 self.exportedImages[imageId] = True
             numberOfExportedPolygons += len(exportedImagesIds)
-            print("Processed {} out of {} polygons".format(numberOfExportedPolygons, numberOfPolygons))
+            currentTime = time.time()
+            print("Processed {} out of {} polygons in {}s".format(numberOfExportedPolygons, numberOfPolygons, currentTime-startTime))
 
         print("Finished...")
 
