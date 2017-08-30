@@ -60,4 +60,5 @@ class GenerateTrainingData(object):
         return (row["pc6"],row["huisnr"])
 
     def getRecordInfo(self, addressRecord):
-        pass
+        #TODO houdt nog geen rekening met huisnummer letter of toevoegingen
+        return (addressRecord[-9], addressRecord[6]),  addressRecord[-3]
