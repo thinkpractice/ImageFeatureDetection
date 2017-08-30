@@ -60,14 +60,15 @@ class ImageTiler(object):
             self.__bufferedMaps.append(self.readImageTile(x, y))
             self.__currentTileCoordinates = (x,y)
         if (self.activeTileNumber < self.numberOfCells):
-            x, y = self.getTileCoordinates(self.activeTileNumber + 1)
-            self.__bufferedMaps.append(self.readImageTile(x, y))
             if self.activeTileNumber > 0:
-
                 self.__currentTileCoordinates = self.__previousTileCoordinates
+            if self.activeTileNumber+1 < self.numberOfCells:
+                x, y = self.getTileCoordinates(self.activeTileNumber + 1)
+                self.__bufferedMaps.append(self.readImageTile(x, y))
+                self.__previousTileCoordinates = (x, y)
+
             if self.activeTileNumber > 1:
                 self.__bufferedMaps.popleft()
-            self.__previousTileCoordinates = (x, y)
             self.__activeTileNumber += 1
             return self.activeTile
         raise StopIteration()

@@ -30,7 +30,7 @@ class GeoMapThumbnailer(object):
         numberOfPolygons, allPolygons = self.getAllPolygons(self.map, gpsBoundingBox)
         print("Starting...")
         numberOfExportedPolygons = 0
-        while next(imageTiler):
+        for _ in imageTiler:
             print("Processing imageTile with {}".format(imageTiler.activeTile.boundingBox))
             polygons = self.getPolygonsInImageTile(imageTiler.activeTile, allPolygons)
             thumbnailer = Thumbnailer(self.exportDirectory)
@@ -45,7 +45,7 @@ class GeoMapThumbnailer(object):
     def getAllPolygons(self, map, boundingBox):
         polygonSource = self.getPolygonSource(map, False)
         polygonSource.query(boundingBox)
-        return polygonSource.numberOfPolygons, polygonSource.polygons
+        return polygonSource.numberOfPolygons, list(polygonSource.polygons)
 
     def getPolygonsInImageTile(self, imageTile, polygons):
         return ((imageId, polygon) for imageId, polygon in polygons if self.doesPolygonNeedsToBeExportedForTile(imageTile, imageId, polygon))

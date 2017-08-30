@@ -35,6 +35,13 @@ class ImageTilerTests(unittest.TestCase):
         self.assertEquals(4, ImageTiler(self.mapWithWidth(255), 64, 400).numberOfColumns)
         self.assertEquals(5, ImageTiler(self.mapWithWidth(257), 64, 500).numberOfColumns)
 
+    # def testImageTilerCalculatesNumberOfCellsCorrectly(self):
+    #     self.assertEquals(1, ImageTiler(self.mapWith(32, 100), 32, 100).numberOfCells)
+    #     self.assertEquals(4, ImageTiler(self.mapWith(63, 100), 32, 200).numberOfCells)
+    #     self.assertEquals(9, ImageTiler(self.mapWith(129, 100), 64, 300).numberOfCells)
+    #     self.assertEquals(20, ImageTiler(self.mapWith(255, 80), 64, 400).numberOfCells)
+    #     self.assertEquals(20, ImageTiler(self.mapWith(257, 125), 64, 500).numberOfCells)
+
     def testGetTileCoordinatesReturnsCoordinatesForTileNumber(self):
         self.assertEquals((0,0), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(0))
         self.assertEquals((32,0), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(1))
@@ -42,6 +49,7 @@ class ImageTilerTests(unittest.TestCase):
         self.assertEquals((0,64), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(3))
         self.assertEquals((32,64), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(4))
         self.assertEquals((64,64), ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(5))
+        #self.assertRaises(StopIteration, lambda: ImageTiler(self.mapWith(68, 100), 32, 64).getTileCoordinates(6))
 
     def testImageTilerLoadsNextTiles(self):
         map = self.mapWith(100, 200)
