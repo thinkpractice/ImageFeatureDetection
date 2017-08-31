@@ -3,6 +3,7 @@ import time
 import numpy as np
 from skimage.io import imsave
 from Src.Models.Polygon import Polygon
+import logging
 
 class Thumbnailer(object):
     def __init__(self, exportDirectory):
@@ -23,7 +24,7 @@ class Thumbnailer(object):
                 numberOfThumbnails += 1
             totalThumbnails += 1
         endTime = time.time()
-        print("Wrote {} thumbnails out of {} in {}s ".format(numberOfThumbnails, totalThumbnails, endTime-startTime))
+        logging.info("Wrote {} thumbnails out of {} in {}s ".format(numberOfThumbnails, totalThumbnails, endTime-startTime))
         return exportedImageIds
 
     def writeThumbnail(self, imageId, polygonArray, imageTiler):
@@ -31,13 +32,13 @@ class Thumbnailer(object):
         p = Polygon(polygonArray)
         polygonImage = imageTiler.getImageForBoundingBox(p.boundingBox)
         if polygonImage is None or np.all(polygonImage == 0):
-            print("Wrong image dimensions for: {} bbox: {}".format(filename, p.boundingBox))
+            logging.error("Wrong image dimensions for: {} bbox: {}".format(filename, p.boundingBox))
             return False
         translatedPolygonCoords = self.translateCoords(p.boundingBox, polygonArray)
         tp = Polygon(translatedPolygonCoords)
         maskedImage = tp.maskImage(polygonImage)
 
-        print("Writing maskedImage: {} bbox: {}".format(filename, p.boundingBox))
+        logging.info("Writing maskedImage: {} bbox: {}".format(filename, p.boundingBox))
         imsave(filename, maskedImage)
         return True
 

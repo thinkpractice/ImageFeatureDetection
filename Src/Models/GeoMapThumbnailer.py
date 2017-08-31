@@ -4,6 +4,7 @@ from Src.Models.Polygon import Polygon
 from Src.Models.OSMPolygonSource import OSMPolygonSource
 from Src.Models.ShapeFilePolygonSource import ShapeFilePolygonSource
 import time
+import logging
 
 class GeoMapThumbnailer(object):
     def __init__(self, map):
@@ -32,8 +33,9 @@ class GeoMapThumbnailer(object):
         print("Starting...")
         numberOfExportedPolygons = 0
         startTime = time.time()
+        logging.basicConfig(filename='/home/tjadejong/Documents/CBS/ZonnePanelen/images.log', level=logging.DEBUG)
         for _ in imageTiler:
-            print("Processing imageTile with {}".format(imageTiler.activeTile.boundingBox))
+            logging.info("Processing imageTile with {}".format(imageTiler.activeTile.boundingBox))
             polygons = self.getPolygonsInImageTile(imageTiler.activeTile, allPolygons)
             thumbnailer = Thumbnailer(self.exportDirectory)
             exportedImagesIds = thumbnailer.writeThumbnails(polygons, imageTiler)
@@ -41,7 +43,7 @@ class GeoMapThumbnailer(object):
                 self.exportedImages[imageId] = True
             numberOfExportedPolygons += len(exportedImagesIds)
             currentTime = time.time()
-            print("Processed {} out of {} polygons in {}s".format(numberOfExportedPolygons, numberOfPolygons, currentTime-startTime))
+            logging.info("Processed {} out of {} polygons in {}s".format(numberOfExportedPolygons, numberOfPolygons, currentTime-startTime))
 
         print("Finished...")
 
