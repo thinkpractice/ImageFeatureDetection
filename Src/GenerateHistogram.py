@@ -50,7 +50,7 @@ class GenerateHistogram(object):
         r = []
         g = []
         b = []
-        for key, _ in histogram:
+        for key, _ in histogram.items():
             x,y,z = key
             r.append(x)
             g.append(y)
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     histogram = generateHistogram.generateHistogram()
     with open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/histogram.csv", 'w') as csvFile:
         csvWriter = csv.writer(csvFile)
-        for key, value in histogram:
+        for key, value in histogram.items():
             r, g, b = key
             csvWriter.writerow([r,g,b, value])
 
