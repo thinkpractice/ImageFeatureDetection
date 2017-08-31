@@ -4,6 +4,7 @@ from collections import deque
 from Src.Models.BoundingBox import BoundingBox
 from Src.Models.ImageTile import ImageTile
 import numpy as np
+import logging
 
 class ImageTiler(object):
     def __init__(self, map, blockXSize, blockYSize):
@@ -81,12 +82,22 @@ class ImageTiler(object):
 
     def getImageForBoundingBox(self, boundingBox):
         image = np.zeros([boundingBox.height, boundingBox.width, 3], dtype=np.uint8)
-        for imageTile in self.__bufferedMaps:
+        for index, imageTile in enumerate(self.__bufferedMaps):
             if not imageTile.inImage(boundingBox):
                 continue
+            logging.info("Outputting image for tile index={}".format(index))
             imagePart = imageTile.partInImage(boundingBox)
+            #Calculate part of boundingBox in imageTile
+            partOfBoundingBoxInTile = boundingBox.overlap(imageTile.boundingBox)
+            translateX = partOfBoundingBoxInTile.left - boundingBox.left
+            translateY = partOfBoundingBoxInTile.top - boundingBox.top
+
+            logging.info("partOfBoundingBox={}".format(partOfBoundingBoxInTile))
             bbox = imagePart.boundingBox
-            image[0:bbox.height, 0:bbox.width, :] = imagePart.image
+            bbox.left += translateX
+            bbox.top += translateY
+            logging.info("bbox={}".format(bbox))
+            image[bbox.yRange, bbox.xRange, :] = imagePart.image
         return image
 
     def getTileCoordinates(self, tileNumber):
