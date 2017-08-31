@@ -93,11 +93,13 @@ class ImageTiler(object):
             translateY = partOfBoundingBoxInTile.top - boundingBox.top
 
             logging.info("partOfBoundingBox={}".format(partOfBoundingBoxInTile))
+
             bbox = imagePart.boundingBox
+            logging.info("bbox1={}, translateX={}, translateY={}".format(bbox, translateX, translateY))
             bbox.left += translateX
             bbox.top += translateY
-            logging.info("bbox={}".format(bbox))
-            image[bbox.yRange, bbox.xRange, :] = imagePart.image
+            logging.info("bbox2={}".format(bbox))
+            image[translateY:translateY+bbox.height, translateX:translateX+bbox.width, :] = imagePart.image
         return image
 
     def getTileCoordinates(self, tileNumber):
