@@ -1,5 +1,6 @@
 import os
 import glob
+import csv
 from skimage.io import imread
 from collections import defaultdict
 from matplotlib import pyplot
@@ -18,7 +19,8 @@ class GenerateHistogram(object):
         totalNumberOfFiles = len(imageFilenames)
         histogramForAllImages = dict()
         for index, filename in enumerate(imageFilenames):
-            histogramForImage = self.generateHistogramForFile(filename)
+            imagePath = os.path.join(self.imageDirectory, filename)
+            histogramForImage = self.generateHistogramForFile(imagePath)
             histogramForAllImages = self.reduceByKey(histogramForAllImages, histogramForImage)
             print("Generated histogram for {}, file {} out of {}".format(filename, index, totalNumberOfFiles))
         return histogramForAllImages
@@ -29,12 +31,12 @@ class GenerateHistogram(object):
         shape = image.shape
         for row in range(shape[0]):
             for column in range(shape[1]):
-                key = image[row, column, :]
+                key = (image[row, column, 0], image[row, column, 1], image[row, column, 2])
                 histogram[key] += 1
         return histogram
 
     def reduceByKey(self, originalList, addedList):
-        for key, value in addedList:
+        for key, value in addedList.items():
             reducedValue = value
             if key in originalList:
                reducedValue = value + originalList[key]
@@ -59,4 +61,11 @@ class GenerateHistogram(object):
 if __name__ == "__main__":
     generateHistogram = GenerateHistogram(r'/home/tjadejong/Documents/CBS/ZonnePanelen/Images')
     histogram = generateHistogram.generateHistogram()
+    with open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/histogram.csv", 'w') as csvFile:
+        csvWriter = csv.writer(csvFile)
+        for key, value in histogram:
+            r, g, b = key
+            csvWriter.writerow([r,g,b, value])
+
     generateHistogram.plot(histogram)
+
