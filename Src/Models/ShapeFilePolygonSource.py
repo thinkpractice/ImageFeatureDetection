@@ -7,7 +7,7 @@ class ShapeFilePolygonSource(PolygonSource):
 
     def query(self, gpsBoundingBox):
         buildings = []
-        buildingShapes = shapefile.Reader(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Shapes/pand_parkstad_wgs84")
+        buildingShapes = shapefile.Reader(r"/home/tjadejong/Documents/CBS/ZonnePanelen/Shapes/panden_parkstad_2016_dis")
         self.numberOfPolygons = buildingShapes.numRecords
         for buildingShape in buildingShapes.iterShapeRecords():
             shapeBoundingBox = buildingShape.shape.bbox
