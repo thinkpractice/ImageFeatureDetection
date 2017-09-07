@@ -1,6 +1,7 @@
 import os
 import glob
 import csv
+import sys
 from skimage.io import imread
 from collections import defaultdict
 from matplotlib import pyplot
@@ -22,7 +23,7 @@ class GenerateHistogram(object):
             imagePath = os.path.join(self.imageDirectory, filename)
             histogramForImage = self.generateHistogramForFile(imagePath)
             histogramForAllImages = self.reduceByKey(histogramForAllImages, histogramForImage)
-            print("Generated histogram for {}, file {} out of {}".format(filename, index, totalNumberOfFiles))
+            #print("Generated histogram for {}, file {} out of {}".format(filename, index, totalNumberOfFiles))
         return histogramForAllImages
 
     def generateHistogramForFile(self, filename):
@@ -58,14 +59,20 @@ class GenerateHistogram(object):
         ax.scatter(r, g, b)
         pyplot.show()
 
-if __name__ == "__main__":
-    generateHistogram = GenerateHistogram(r'/home/tjadejong/Documents/CBS/ZonnePanelen/Images')
+
+def createHistogram(imageDirectory, filename):
+    generateHistogram = GenerateHistogram(imageDirectory)
     histogram = generateHistogram.generateHistogram()
-    with open(r"/home/tjadejong/Documents/CBS/ZonnePanelen/histogram.csv", 'w') as csvFile:
+    with open(filename, 'w') as csvFile:
         csvWriter = csv.writer(csvFile)
         for key, value in histogram.items():
             r, g, b = key
-            csvWriter.writerow([r,g,b, value])
+            csvWriter.writerow([r, g, b, value])
 
-    generateHistogram.plot(histogram)
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("usage: GenerateHistogram.py <directory> <filename.csv>")
+        exit(1)
+    createHistogram(sys.argv[1], sys.argv[2])
+
 

@@ -12,20 +12,21 @@ def query(queryString):
 def queryPostalCode(city, postalcode, country):
     postalCodeQuery = "http://nominatim.openstreetmap.org/search?format=json&q={}+{}+{}&addressdetails=1&namedetails=1"
     queryString = postalCodeQuery.format(city, postalcode, country)
-    code, json = query(queryString)
+    json = query(queryString)
     if len(json) > 1:
         print("Multiple postal codes found")
-    if code == 200 and len(json) > 0:
+    if len(json) > 0:
         json = json[0]
         return json["lat"], json["lon"]
     return None
 
 def queryAddress(lat, lon):
     addressQuery = "http://nominatim.openstreetmap.org/reverse?format=json&lat={}&lon={}"
-    code, json = query(addressQuery.format(lat, lon))
-    if code == 200:
-        return json["address"].get("road", "")
-    return ""
+    json = query(addressQuery.format(lat, lon))
+    if not json:
+        return ""
+    return json["address"].get("road", "")
+
 
 with open(r"/home/tjadejong/Downloads/Adressen_zonnepanelen_zonder_finr.csv", "r") as csvFile:
     csvReader = csv.reader(csvFile, delimiter=";")
