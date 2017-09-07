@@ -81,11 +81,13 @@ class ImageTiler(object):
         return False
 
     def getImageForBoundingBox(self, boundingBox):
+        logging.info("getImageForBoundingBox={}".format(boundingBox))
         image = np.zeros([boundingBox.height, boundingBox.width, 3], dtype=np.uint8)
         for index, imageTile in enumerate(self.__bufferedMaps):
             if not imageTile.inImage(boundingBox):
                 continue
             logging.info("Outputting image for tile index={}".format(index))
+            logging.info("Bbox imageTile = {}".format(imageTile.boundingBox))
             imagePart = imageTile.partInImage(boundingBox)
             #Calculate part of boundingBox in imageTile
             partOfBoundingBoxInTile = boundingBox.overlap(imageTile.boundingBox)
@@ -111,5 +113,7 @@ class ImageTiler(object):
 
     def readImageTile(self, x, y):
         image = self.map.readTile(x, y, self.blockXSize, self.blockYSize)
-        boundingBox = BoundingBox([x, y, self.blockXSize, self.blockYSize])
+        tileWidth = image.shape[1]
+        tileHeight = image.shape[0]
+        boundingBox = BoundingBox([x, y, tileWidth, tileHeight])
         return ImageTile(image, boundingBox)
