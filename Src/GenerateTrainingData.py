@@ -32,7 +32,7 @@ class GenerateTrainingData(object):
             address, buildingNumber = self.getRecordInfo(addressRecord)
             imagePath = self.filePathFor(buildingNumber)
             if not os.path.exists(imagePath):
-                print("Not available {}".format(imagePath))
+                print("Not available {}, address={}".format(imagePath, address))
                 continue
 
             imageFilename = self.imageNameFor(buildingNumber)
@@ -44,7 +44,7 @@ class GenerateTrainingData(object):
     def generatePositivesLookup(self, filename):
         lookup = set()
         with open(filename, "r") as positivesFile:
-            csvReader = csv.DictReader(positivesFile, delimiter=",")
+            csvReader = csv.reader(positivesFile, delimiter=",")
             for row in csvReader:
                 #TODO filter out rows after 2016 (as our image is from summer 2016)
                 keyTuple = self.getAddressFromLookup(row)
@@ -65,7 +65,7 @@ class GenerateTrainingData(object):
         return "{}.png".format(buildingNumber)
 
     def getAddressFromLookup(self, row):
-        address = (row["pc6"].lower(), row["huisnr"])
+        address = (row[0].lower(), row[1])
         return address
 
     def getRecordInfo(self, addressRecord):
@@ -74,7 +74,7 @@ class GenerateTrainingData(object):
         return recordInfo
 
 def main():
-    generateTrainingData = GenerateTrainingData(r'/home/tjadejong/Documents/CBS/ZonnePanelen/Images', r'/home/tjadejong/Documents/CBS/ZonnePanelen/Shapes/num_parkstad_wgs84', r'/home/tjadejong/Documents/CBS/ZonnePanelen/ArcGis_zonnepanelen_zonderbtwnr2.csv')
+    generateTrainingData = GenerateTrainingData(r'/home/tjadejong/Documents/CBS/ZonnePanelen/Images', r'/home/tjadejong/Documents/CBS/ZonnePanelen/Shapes/num_parkstad_wgs84', r'/home/tjadejong/Documents/CBS/ZonnePanelen/addresses_solar_panels.csv')
     generateTrainingData.generateTrainingSet()
 
 if __name__ == "__main__":
