@@ -1,6 +1,7 @@
 from matplotlib import pyplot
 from mpl_toolkits.mplot3d import Axes3D
 import csv
+<<<<<<< HEAD
 import sys
 
 def loadHistogramFile(filename):
@@ -41,7 +42,3 @@ def main(args):
 if __name__ == "__main__":
     args = sys.argv
     main(args)
-
-
-
-
