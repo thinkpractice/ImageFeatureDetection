@@ -4,11 +4,15 @@ import csv
 import sys
 import math
 import argparse
+import numpy as np
 
 def loadHistogramFile(filename):
     with open(filename, 'r') as csvFile:
         csvReader = csv.reader(csvFile)
         return [[int(value) for value in row] for row in csvReader]
+
+def getPercentiles(values):
+    return [np.percentile(values, p) for p in [25, 50, 75, 100]] #range(0, 100, 10)]
 
 def plotHistogram(histogram, plotIntensities):
     fig = pyplot.figure()
@@ -35,6 +39,15 @@ def plotHistogram(histogram, plotIntensities):
     print(minV)
     if plotIntensities:
         scaledValues = [(c - minV) / (maxV - minV) for c in colors]
+        values = np.array(colors)
+        values.sort()
+        percentiles = getPercentiles(values)
+        scaledValues = []
+        for c in colors:
+            for index, p in enumerate(reversed(percentiles)):
+                if c <= p:
+                    scaledValues.append(index / 3)
+        print(scaledValues)
         colors = pyplot.cm.jet(scaledValues)
         ax.scatter(r, g, b, c=colors)
     else:
