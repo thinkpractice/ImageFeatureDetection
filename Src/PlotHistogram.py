@@ -2,43 +2,63 @@ from matplotlib import pyplot
 from mpl_toolkits.mplot3d import Axes3D
 import csv
 import sys
+import math
+import argparse
 
 def loadHistogramFile(filename):
-    histogram = []
     with open(filename, 'r') as csvFile:
         csvReader = csv.reader(csvFile)
-        for row in csvReader:
-            r, g, b, v = row
-            histogram.append((int(r), int(g), int(b)))
-    return histogram
+        return [[int(value) for value in row] for row in csvReader]
 
-def plotHistogram(histogram):
+def plotHistogram(histogram, plotIntensities):
     fig = pyplot.figure()
     ax = Axes3D(fig)
     r = []
     g = []
     b = []
     colors = []
+    minV = sys.maxsize
+    maxV = 0
     for row in histogram:
-        x, y, z = row
+        x, y, z, v = row
         r.append(x)
         g.append(y)
         b.append(z)
-        colors.append([value / 255 for value in row])
-    ax.scatter(r, g, b, c=colors)
+        minV = min(v, minV)
+        maxV = max(v, maxV)
+        if plotIntensities:
+            colors.append(v)
+        else:
+            colors.append([value / 255 for index, value in enumerate(row) if index < 3])
+
+    print(maxV)
+    print(minV)
+    if plotIntensities:
+        scaledValues = [(c - minV) / (maxV - minV) for c in colors]
+        colors = pyplot.cm.jet(scaledValues)
+        ax.scatter(r, g, b, c=colors)
+    else:
+        ax.scatter(r, g, b, c=colors)
     pyplot.show()
 
-def main(args):
-    if len(args) < 2:
-        print("usage: PlotHistogram <input file.csv> [#items per histograms]")
-        exit(1)
+def main():
+    parser = argparse.ArgumentParser(description="usage: PlotHistogram <input file.csv> [#items per histograms] [plot intensities as colors=1]")
+    parser.add_argument("filename", type=str, help="The histogram csv file to plot")
+    parser.add_argument("--noitems", type=int, help="The number of items in the csv file to plot per histogram", required=False, default=-1)
+    parser.add_argument("--intensities", help="Displays color histogram values instead of the color value ", required=False, action="store_true")
 
-    histogramData = loadHistogramFile(args[1])
+    args = parser.parse_args()
+
+    plotIntensities = False
+    if args.intensities:
+        plotIntensities = True
+
+    histogramData = loadHistogramFile(args.filename)
     totalNumberOfItems = len(histogramData)
 
     print("Loaded histogram with {} items".format(totalNumberOfItems))
-    if len(args) == 3:
-        itemsPerHistogram = int(args[2])
+    if args.noitems != -1:
+        itemsPerHistogram = args.noitems
     else:
         itemsPerHistogram = totalNumberOfItems-1
 
@@ -46,9 +66,8 @@ def main(args):
     for index, histogramItem in enumerate(histogramData):
         histogram.append(histogramItem)
         if index > 0 and (index % itemsPerHistogram == 0):
-            plotHistogram(histogram)
+            plotHistogram(histogram, plotIntensities)
             histogram = []
 
 if __name__ == "__main__":
-    args = sys.argv
-    main(args)
+    main()
