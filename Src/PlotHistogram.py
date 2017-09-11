@@ -1,7 +1,6 @@
 from matplotlib import pyplot
 from mpl_toolkits.mplot3d import Axes3D
 import csv
-<<<<<<< HEAD
 import sys
 
 def loadHistogramFile(filename):
@@ -31,13 +30,24 @@ def plotHistogram(histogram):
 
 def main(args):
     if len(args) < 2:
-        print("usage: PlotHistogram <input file.csv> [#histograms]")
+        print("usage: PlotHistogram <input file.csv> [#items per histograms]")
         exit(1)
-    if len(args) == 3:
-        numberOfHistograms = int(args[2])
-    histogram = loadHistogramFile(args[1])
-    plotHistogram(histogram)
 
+    histogramData = loadHistogramFile(args[1])
+    totalNumberOfItems = len(histogramData)
+
+    print("Loaded histogram with {} items".format(totalNumberOfItems))
+    if len(args) == 3:
+        itemsPerHistogram = int(args[2])
+    else:
+        itemsPerHistogram = totalNumberOfItems-1
+
+    histogram = []
+    for index, histogramItem in enumerate(histogramData):
+        histogram.append(histogramItem)
+        if index > 0 and (index % itemsPerHistogram == 0):
+            plotHistogram(histogram)
+            histogram = []
 
 if __name__ == "__main__":
     args = sys.argv
