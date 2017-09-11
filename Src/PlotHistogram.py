@@ -14,6 +14,9 @@ def loadHistogramFile(filename):
 def getPercentiles(values):
     return [np.percentile(values, p) for p in [25, 50, 75, 100]] #range(0, 100, 10)]
 
+def filterList(values, indices):
+    return [value for index, value in enumerate(values) if index in indices]
+
 def plotHistogram(histogram, plotIntensities):
     fig = pyplot.figure()
     ax = Axes3D(fig)
@@ -38,18 +41,20 @@ def plotHistogram(histogram, plotIntensities):
     print(maxV)
     print(minV)
     if plotIntensities:
-        scaledValues = [(c - minV) / (maxV - minV) for c in colors]
+        #scaledValues = [(c - minV) / (maxV - minV) for c in colors]
         values = np.array(colors)
         values.sort()
         percentiles = getPercentiles(values)
         scaledValues = []
-        for c in colors:
+        filteredIndices = set()
+        for colorIndex, c in enumerate(colors):
             for index, p in enumerate(reversed(percentiles)):
                 if c <= p:
                     scaledValues.append(index / 3)
-        print(scaledValues)
+                    if index > 1:
+                        filteredIndices.add(colorIndex)
         colors = pyplot.cm.jet(scaledValues)
-        ax.scatter(r, g, b, c=colors)
+        ax.scatter(filterList(r,filteredIndices), filterList(g,filteredIndices), filterList(b,filteredIndices), c=colors)
     else:
         ax.scatter(r, g, b, c=colors)
     pyplot.show()
