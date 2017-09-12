@@ -17,6 +17,15 @@ def getPercentiles(values):
 def filterList(values, indices):
     return [value for index, value in enumerate(values) if index in indices]
 
+def normalizeColorData(data):
+    n = (data[:,0] + data[:,1] + data[:,2] + 1e-6)
+    return np.stack([data[:,0] / n, data[:,1] / n, data[:,2] / n], axis=1)
+
+def plotNormalizedData(normalizedData):
+    colors = [(r,g, b) for r, g, b in normalizedData]
+    pyplot.scatter(normalizedData[:,0], normalizedData[:,1], c=colors)
+    pyplot.show()
+
 def plotHistogram(histogram, plotIntensities):
     fig = pyplot.figure()
     ax = Axes3D(fig)
@@ -72,6 +81,10 @@ def main():
         plotIntensities = True
 
     histogramData = loadHistogramFile(args.filename)
+    normalizedData = normalizeColorData(np.array(histogramData))
+    print(normalizedData.shape)
+    plotNormalizedData(normalizedData)
+
     totalNumberOfItems = len(histogramData)
 
     print("Loaded histogram with {} items".format(totalNumberOfItems))
@@ -80,12 +93,12 @@ def main():
     else:
         itemsPerHistogram = totalNumberOfItems-1
 
-    histogram = []
-    for index, histogramItem in enumerate(histogramData):
-        histogram.append(histogramItem)
-        if index > 0 and (index % itemsPerHistogram == 0):
-            plotHistogram(histogram, plotIntensities)
-            histogram = []
-
+#    histogram = []
+#    for index, histogramItem in enumerate(histogramData):
+#        histogram.append(histogramItem)
+#        if index > 0 and (index % itemsPerHistogram == 0):
+#            plotHistogram(histogram, plotIntensities)
+#            histogram = []
+#
 if __name__ == "__main__":
     main()
