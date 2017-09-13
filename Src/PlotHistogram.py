@@ -23,7 +23,10 @@ def normalizeColorData(data):
 
 def plotNormalizedData(normalizedData):
     colors = [(r,g, b) for r, g, b in normalizedData]
-    pyplot.scatter(normalizedData[:,0], normalizedData[:,1], c=colors)
+    axes = pyplot.gca()
+    axes.set_xlim([0,1])
+    axes.set_ylim([0,1])
+    axes.scatter(normalizedData[:,0], normalizedData[:,1], c=colors)
     pyplot.show()
 
 def plotHistogram(histogram, plotIntensities):

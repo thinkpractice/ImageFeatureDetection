@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import csv
+import matplotlib
 from sklearn.cluster import KMeans
 from matplotlib import pyplot
 
@@ -22,13 +23,24 @@ def main(argv):
     histogramData1 = loadHistogramFile(argv[1])
     normalizedData1 = normalizeColorData(histogramData1)
 
+    ones = np.ones([normalizedData1.shape[0],1])
+    print(ones)
+    classifiedData1 = np.hstack((normalizedData1, ones))
+
+
     histogramData2 = loadHistogramFile(argv[2])
     normalizedData2 = normalizeColorData(histogramData2)
 
-    allData = np.vstack((normalizedData1, normalizedData2))
+    zeros = np.zeros([normalizedData2.shape[0],1])
+    print(zeros)
+    classifiedData2 = np.hstack((normalizedData2, zeros))
+
+    allData = np.vstack((normalizedData2, normalizedData1))
     print(allData)
 
-    kmeans = KMeans(n_clusters=2)
+    allDataClassified = np.vstack((classifiedData1, classifiedData2))
+    
+    kmeans = KMeans(n_clusters=3)
     kmeans.fit(allData)
 
     prediction1 = kmeans.predict(normalizedData1)
@@ -36,7 +48,10 @@ def main(argv):
 
     prediction2 = kmeans.predict(normalizedData2)
     print([x for x in bin(prediction2)])
-
+    
+    colors = ["red", "blue"]
+    pyplot.scatter(allData[:,0], allData[:,1], c=allDataClassified[:,2], cmap=matplotlib.colors.ListedColormap(colors))
+    pyplot.show()
 
 if __name__ == "__main__":
     main(sys.argv)
