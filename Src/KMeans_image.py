@@ -1,6 +1,7 @@
 from skimage.io import imread
 from skimage.morphology import disk
 from skimage.filters.rank import median
+from skimage.segmentation import random_walker
 from sklearn.cluster import KMeans
 from matplotlib import pyplot
 import numpy as np
@@ -10,7 +11,6 @@ def normalizePixels(image):
     #Define normalized image space
     y = image[:,:,0].astype(float) + image[:,:,1].astype(float) + image[:,:,2].astype(float) + 1e-6
     Y = np.stack((y,y,y), axis=2)
-    #print(Y[Y > 0])
     return np.nan_to_num(image / Y)
 
 def calculateKmeans(image):
@@ -23,24 +23,29 @@ def calculateKmeans(image):
     centers = np.array([[1,0,0], [0,1,0],[0,0,1],[0,1,1],[1,1,0],[1,0,1]]).astype(float)
     kmeansImage = centers[kmeans.labels_]
     kmeansImage = kmeansImage.reshape(image.shape)
-
+    
     filteredImage = np.stack((median(kmeansImage[:,:,0]),median(kmeansImage[:,:,1]), median(kmeansImage[:,:,2])), axis=2)
-    return kmeansImage, filteredImage
+
+    labels = random_walker(image, kmeans.labels_, multichannel=True)
+    segmentedImage = centers[labels]
+    return kmeansImage, filteredImage, segmentedImage
 
 def main(argv):
     image = imread(argv[1])
     normalizedImage = normalizePixels(image)
 
-    kmeansImage, filteredImage = calculateKmeans(image)
-    normalizedKmeansImage, normalizedFilteredImage = calculateKmeans(normalizedImage * 255)
+    kmeansImage, filteredImage, segmentedImage = calculateKmeans(image)
+    normalizedKmeansImage, normalizedFilteredImage, normalizedSegmentedImage = calculateKmeans(normalizedImage * 255)
 
-    f, axes = pyplot.subplots(2, 3)
+    f, axes = pyplot.subplots(2, 4)
     axes[0,0].imshow(image)
     axes[0,1].imshow(kmeansImage)
     axes[0,2].imshow(filteredImage)
+    axes[0,3].imshow(segmentedImage)
     axes[1,0].imshow(normalizedImage)
     axes[1,1].imshow(normalizedKmeansImage)
     axes[1,2].imshow(normalizedFilteredImage)
+    axes[1,3].imshow(normalizedSegmentedImage)
     pyplot.show()
 
 if __name__ == "__main__":
