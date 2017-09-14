@@ -16,15 +16,14 @@ def normalizePixels(image):
 def calculateKmeans(image):
     kmeans = KMeans(n_clusters=6)
     
-    reshapedImage = image.reshape([-1,3])
+    filteredImage = np.stack((median(image[:,:,0]),median(image[:,:,1]), median(image[:,:,2])), axis=2)
+    reshapedImage = filteredImage.reshape([-1,3])
     kmeans.fit(reshapedImage)
 
     centers = np.uint8(kmeans.cluster_centers_)
     centers = np.array([[1,0,0], [0,1,0],[0,0,1],[0,1,1],[1,1,0],[1,0,1]]).astype(float)
     kmeansImage = centers[kmeans.labels_]
     kmeansImage = kmeansImage.reshape(image.shape)
-    
-    filteredImage = np.stack((median(kmeansImage[:,:,0]),median(kmeansImage[:,:,1]), median(kmeansImage[:,:,2])), axis=2)
 
     labels = random_walker(image, kmeans.labels_, multichannel=True)
     segmentedImage = centers[labels]
@@ -35,16 +34,16 @@ def main(argv):
     normalizedImage = normalizePixels(image)
 
     kmeansImage, filteredImage, segmentedImage = calculateKmeans(image)
-    normalizedKmeansImage, normalizedFilteredImage, normalizedSegmentedImage = calculateKmeans(normalizedImage * 255)
+    normalizedKmeansImage, normalizedFilteredImage, normalizedSegmentedImage = calculateKmeans(normalizedImage)
 
     f, axes = pyplot.subplots(2, 4)
     axes[0,0].imshow(image)
-    axes[0,1].imshow(kmeansImage)
-    axes[0,2].imshow(filteredImage)
+    axes[0,1].imshow(filteredImage)
+    axes[0,2].imshow(kmeansImage)
     axes[0,3].imshow(segmentedImage)
     axes[1,0].imshow(normalizedImage)
-    axes[1,1].imshow(normalizedKmeansImage)
-    axes[1,2].imshow(normalizedFilteredImage)
+    axes[1,1].imshow(normalizedFilteredImage)
+    axes[1,2].imshow(normalizedKmeansImage)
     axes[1,3].imshow(normalizedSegmentedImage)
     pyplot.show()
 
