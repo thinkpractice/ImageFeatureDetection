@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 from scipy.stats import skew
 from scipy.stats import kurtosis
 import sys
+import math
 
 def filterImage(image):
     #filter black background color out of the image
@@ -11,7 +12,12 @@ def filterImage(image):
     return flatColorArray.reshape(len(flatColorArray) // 3, 3)
 
 def plotHistogram(axes, imageComponent, plotColor, binRange):
-    return axes.hist(imageComponent.ravel(), 255, range=binRange, color=plotColor)
+    return axes.hist(imageComponent, 255, range=binRange, color=plotColor)
+
+def stdHist(bins, n):
+    total = n.sum()
+    mean = (1/total) * bins * n
+    return math.sqrt((1/total) * (n * ((bins - mean) ** 2)).sum())
 
 def getIntensity(image):
     w1 = 1/3
@@ -26,16 +32,19 @@ def calc(filteredImage, ax, componentIndex, colors):
     elif componentIndex == 4:
         histogramImage = filteredImage[:,0] - filteredImage[:,2]
         normalizedImage = histogramImage / intensityImage.astype(float)
-        print(normalizedImage)
-        n, _, _ = plotHistogram(ax, normalizedImage, colors[componentIndex],[-255, 255])
-        print(skew(n))
-        print(skew(n[n > 0]))
+        n, bins, _ = plotHistogram(ax, normalizedImage, colors[componentIndex],[-1, 1])
+        #TODO add skewness for histogram?
+        print("skewness={}".format(skew(normalizedImage)))
+        #print(skew(n))
+        #print(skew(n[n > 0]))
+        print("std={}".format(stdHist(bins[0:-1], n)))
+        #print(n[n > 0].std())
     elif componentIndex == 5:
         histogramImage = filteredImage[:,1] - filteredImage[:,2]
-        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-255, 255])
+        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-1, 1])
     elif componentIndex == 6:
         histogramImage = filteredImage[:,0] - filteredImage[:,1]
-        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-255, 255])
+        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-1, 1])
 
 def plotHistograms(axes, image, numberOfImages, fileIndex):
     colors = ["red", "green", "blue", "black", "purple", "black", "orange"]
