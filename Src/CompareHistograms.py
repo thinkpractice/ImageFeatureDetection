@@ -25,7 +25,9 @@ def calc(filteredImage, ax, componentIndex, colors):
         n, _, _ = plotHistogram(ax, intensityImage, colors[componentIndex],[0, 255])
     elif componentIndex == 4:
         histogramImage = filteredImage[:,0] - filteredImage[:,2]
-        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-255, 255])
+        normalizedImage = histogramImage / intensityImage.astype(float)
+        print(normalizedImage)
+        n, _, _ = plotHistogram(ax, normalizedImage, colors[componentIndex],[-255, 255])
         print(skew(n))
         print(skew(n[n > 0]))
     elif componentIndex == 5:
