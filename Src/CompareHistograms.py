@@ -6,34 +6,49 @@ import sys
 
 def filterImage(image):
     #filter black background color out of the image
-    return image[image[:,:] != 0]  * 1.0
+    filteredColors = image.reshape(image.shape[0]*image.shape[1], 3)
+    flatColorArray = filteredColors[filteredColors[:,:] != (0,0,0)] * 1.0
+    return flatColorArray.reshape(len(flatColorArray) // 3, 3)
 
 def plotHistogram(axes, imageComponent, plotColor, binRange):
     return axes.hist(imageComponent.ravel(), 255, range=binRange, color=plotColor)
 
+def getIntensity(image):
+    w1 = 1/3
+    w2 = 1/3
+    w3 = 1/3
+    return (w1 * image[:,0]) + (w2 * image[:,1]) + (w3 * image[:,2])
+
+def calc(filteredImage, ax, componentIndex, colors):
+    intensityImage = getIntensity(filteredImage)
+    if componentIndex == 3:
+        n, _, _ = plotHistogram(ax, intensityImage, colors[componentIndex],[0, 255])
+    elif componentIndex == 4:
+        histogramImage = filteredImage[:,0] - filteredImage[:,2]
+        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-255, 255])
+        print(skew(n))
+        print(skew(n[n > 0]))
+    elif componentIndex == 5:
+        histogramImage = filteredImage[:,1] - filteredImage[:,2]
+        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-255, 255])
+    elif componentIndex == 6:
+        histogramImage = filteredImage[:,0] - filteredImage[:,1]
+        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-255, 255])
+
 def plotHistograms(axes, image, numberOfImages, fileIndex):
-    colors = ["red", "green", "blue", "purple", "black", "orange"]
-    for componentIndex in range(7):
+    colors = ["red", "green", "blue", "black", "purple", "black", "orange"]
+    for componentIndex in range(8):
         if numberOfImages == 1:
             ax = axes[componentIndex]
         else:
             ax = axes[fileIndex, componentIndex]
-
-        if componentIndex == 3:
-            histogramImage = filterImage(image[:,:,0]) - filterImage(image[:,:,2])
-            n, _, _ = plotHistogram(ax, histogramImage, colors[componentIndex],[-255, 255])
-            print(skew(n))
-            print(skew(n[n > 0]))
-        elif componentIndex == 4:
-            histogramImage = filterImage(image[:,:,1]) - filterImage(image[:,:,2])
-            n, _, _ = plotHistogram(ax, histogramImage, colors[componentIndex],[-255, 255])
-        elif componentIndex == 5:
-            histogramImage = filterImage(image[:,:,0]) - filterImage(image[:,:,1])
-            n, _, _ = plotHistogram(ax, histogramImage, colors[componentIndex],[-255, 255])
-        elif componentIndex == 6:
+        
+        filteredImage = filterImage(image)
+        calc(filteredImage, ax, componentIndex, colors)
+        if componentIndex == 7:
             ax.imshow(image)
-        else:
-            histogramImage = filterImage(image[:,:, componentIndex])
+        elif componentIndex < 3:
+            histogramImage = filteredImage[:, componentIndex]
             plotHistogram(ax, histogramImage, colors[componentIndex],[0, 255])
 
 def main(argv):
@@ -42,7 +57,7 @@ def main(argv):
         exit(1)
     
     numberOfImages = len(argv) - 1
-    f, axes = plt.subplots(numberOfImages, 7)
+    f, axes = plt.subplots(numberOfImages, 8)
     for fileIndex, filename in enumerate(argv[1:]):
         image = imread(filename)
         plotHistograms(axes, image, numberOfImages, fileIndex)
