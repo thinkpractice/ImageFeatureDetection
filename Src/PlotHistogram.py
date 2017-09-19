@@ -96,12 +96,12 @@ def main():
     else:
         itemsPerHistogram = totalNumberOfItems-1
 
-#    histogram = []
-#    for index, histogramItem in enumerate(histogramData):
-#        histogram.append(histogramItem)
-#        if index > 0 and (index % itemsPerHistogram == 0):
-#            plotHistogram(histogram, plotIntensities)
-#            histogram = []
-#
+    histogram = []
+    for index, histogramItem in enumerate(histogramData):
+        histogram.append(histogramItem)
+        if index > 0 and (index % itemsPerHistogram == 0):
+            plotHistogram(histogram, plotIntensities)
+            histogram = []
+
 if __name__ == "__main__":
     main()

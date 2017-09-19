@@ -22,16 +22,19 @@ def blueFilter(image):
     filteredImage = np.zeros(image.shape)
     filteredImage[imageRedMask] = image[imageRedMask]
     filteredImage[imageBlueMask] = image[imageBlueMask]
-    return filteredImage
+    blueImage = np.zeros(image.shape)
+    blueImage[imageBlueMask] = image[imageBlueMask]
+    return filteredImage, blueImage
 
 def main(argv):
     image = imread(argv[1])
     normalizedImage = normalizePixels(image)
-    filteredImage = blueFilter(normalizedImage)
-    f, axes = pyplot.subplots(1, 3)
+    filteredImage, filteredBlueImage = blueFilter(normalizedImage)
+    f, axes = pyplot.subplots(1, 4)
     axes[0].imshow(image)
     axes[1].imshow(normalizedImage)
-    axes[2].imshow(filteredImage,cmap="gray")
+    axes[2].imshow(filteredImage)
+    axes[3].imshow(filteredBlueImage)
     pyplot.show()
 
 if __name__ == "__main__":

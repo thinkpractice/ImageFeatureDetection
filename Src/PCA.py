@@ -19,7 +19,7 @@ def main(argv):
     print("singular values={}".format(pca.singular_values_))
 
     reduced = PCA(n_components=2).fit_transform(histogramData)
-    pyplot.scatter(reduced[:,0], reduced[:, 1])
+    pyplot.scatter(reduced[:,1], np.ones(len(reduced[:,1]))) # reduced[:, 1])
     pyplot.show()
 
 if __name__ == "__main__":

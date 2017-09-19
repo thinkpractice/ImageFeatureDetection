@@ -1,0 +1,2 @@
+python3 CompareHistograms.py /home/tjadejong/Documents/CBS/ZonnePanelen/Images/Negatives_all/0882100000025579.png /home/tjadejong/Documents/CBS/ZonnePanelen/Images/Negatives_all/0882100000025580.png /home/tjadejong/Documents/CBS/ZonnePanelen/Images/Negatives_all/0882100000025581.png /home/tjadejong/Documents/CBS/ZonnePanelen/Images/Negatives_all/0882100000025583.png /home/tjadejong/Documents/CBS/ZonnePanelen/Images/Negatives_all/0882100000025578.png
+
