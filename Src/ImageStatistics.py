@@ -40,6 +40,10 @@ def rgbImageCovarianceMatrix(rgbImage):
             covarianceMatrix[c, r] = covariance
     return covarianceMatrix
 
+def pca(rgbImage):
+    covarianceMatrix = rgbImageCovarianceMatrix(rgbImage)
+    return np.linalg.svd(covarianceMatrix)
+
 
 def fractionOfInformation(rgbImage):
     pass

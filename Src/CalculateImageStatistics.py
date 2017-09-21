@@ -14,7 +14,7 @@ def main(argv):
     print("imageMeans={}".format(ImageStatistics.rgbImageMean(normalizedImage)))
     print("imageVariance={}".format(ImageStatistics.rgbImageVariance(normalizedImage)))
     print("image covariance matrix={}".format(ImageStatistics.rgbImageCovarianceMatrix(normalizedImage)))
-
+    print("pca={}".format(ImageStatistics.pca(normalizedImage)))
 
 if __name__ == "__main__":
     main(sys.argv)
