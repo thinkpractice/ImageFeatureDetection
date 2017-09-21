@@ -45,10 +45,13 @@ def calc(filteredImage, ax, componentIndex, colors):
     elif componentIndex == 6:
         histogramImage = filteredImage[:,0] - filteredImage[:,1]
         n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-1, 1])
+    elif componentIndex == 7:
+        histogramImage = filteredImage[:,0] - getIntensity(filteredImage)
+        n, _, _ = plotHistogram(ax, histogramImage / intensityImage.astype(float), colors[componentIndex],[-1, 1])
 
 def plotHistograms(axes, image, numberOfImages, fileIndex):
-    colors = ["red", "green", "blue", "black", "purple", "black", "orange"]
-    for componentIndex in range(8):
+    colors = ["red", "green", "blue", "black", "purple", "black", "orange","black"]
+    for componentIndex in range(9):
         if numberOfImages == 1:
             ax = axes[componentIndex]
         else:
@@ -56,7 +59,7 @@ def plotHistograms(axes, image, numberOfImages, fileIndex):
         
         filteredImage = filterImage(image)
         calc(filteredImage, ax, componentIndex, colors)
-        if componentIndex == 7:
+        if componentIndex == 8:
             ax.imshow(image)
         elif componentIndex < 3:
             histogramImage = filteredImage[:, componentIndex]
@@ -68,7 +71,7 @@ def main(argv):
         exit(1)
     
     numberOfImages = len(argv) - 1
-    f, axes = plt.subplots(numberOfImages, 8)
+    f, axes = plt.subplots(numberOfImages, 9)
     for fileIndex, filename in enumerate(argv[1:]):
         image = imread(filename)
         plotHistograms(axes, image, numberOfImages, fileIndex)
