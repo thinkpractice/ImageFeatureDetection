@@ -50,12 +50,22 @@ class MinMaxExtractor(FeatureExtractor):
         return features
 
 class Preprocessor(object):
+    def __init__(self, prefix=""):
+        self.__prefix = prefix
+
     @property
     def prefix(self):
-        return ""
+        return self.__prefix
 
     def process(self, image):
         return image
+
+class PcaPreprocessor(Preprocessor):
+    def __init__(self):
+        super().__init__("pca_")
+
+    def process(self, image):
+        return ImageStatistics.pcaTransform(image)
 
 class FeatureExtractorCollection(object):
     @property
@@ -66,15 +76,16 @@ class FeatureExtractorCollection(object):
                 MinMaxExtractor()]
 
     @property
+    def preprocessors(self):
+        return [Preprocessor(),
+                PcaPreprocessor()]
+
+    @property
     def header(self):
         header = ["filename"]
         header.extend(["{}{}".format(preprocessor.prefix, fieldName) for preprocessor in self.preprocessors for featureExtractor in self.featureExtractors for fieldName in featureExtractor.fields])
         header.append("class")
         return header
-
-    @property
-    def preprocessors(self):
-        return [Preprocessor()]
 
     def getImageFilenames(self, directory):
         return [os.path.join(directory, filename) for filename in glob.glob1(directory, "*.png")]
