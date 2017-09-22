@@ -26,7 +26,7 @@ def rgbImageMean(image):
     return rgbApply(image, lambda imageBand: imageMean(imageBand))
 
 def rgbCenterImage(image):
-    return np.stack(rgbApply(image, lambda imageBand: centerImage(imageBand)))
+    return np.stack(rgbApply(image, lambda imageBand: centerImage(imageBand)),axis=2)
 
 def rgbImageVariance(image):
     return rgbApply(image, lambda imageBand: imageVariance(imageBand))
@@ -40,10 +40,18 @@ def rgbImageCovarianceMatrix(rgbImage):
             covarianceMatrix[c, r] = covariance
     return covarianceMatrix
 
+def flattenImage(rgbImage):
+    return rgbImage.reshape(rgbImage.shape[0] * rgbImage.shape[1], 3)
+
 def pca(rgbImage):
     covarianceMatrix = rgbImageCovarianceMatrix(rgbImage)
     return np.linalg.svd(covarianceMatrix)
 
+def pcaTransform(rgbImage):
+    u,s,v = pca(rgbImage)
+    imageVector = flattenImage(rgbImage)
+    transposedVector = imageVector.dot(v)
+    return transposedVector.reshape(rgbImage.shape)
 
 def fractionOfInformation(rgbImage):
     pass
