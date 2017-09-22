@@ -49,6 +49,9 @@ class MinMaxExtractor(FeatureExtractor):
         features.extend(ImageStatistics.rgbMaxima(image))
         return features
 
+class CountColorExtractor(FeatureExtractor):
+    pass
+
 class Preprocessor(object):
     def __init__(self, prefix=""):
         self.__prefix = prefix
