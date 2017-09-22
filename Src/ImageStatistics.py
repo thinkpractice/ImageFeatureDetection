@@ -25,6 +25,18 @@ def linearCorrelation(image1, image2):
 def rgbApply(image, function):
     return [function(image[:,:,i]) for i in range(3)]
 
+def rgbMinima(image):
+    return rgbApply(image, lambda imageBand: imageBand.min())
+
+def rgbMaxima(image):
+    return rgbApply(image, lambda imageBand: imageBand.max())
+
+def rgbMedian(image):
+    return rgbApply(image, lambda imageBand: np.median(imageBand))
+
+def rgbPercentile(image, q):
+    return rgbApply(image, lambda imageBand: np.percentile(imageBand, q))
+
 def rgbImageMean(image):
     return rgbApply(image, lambda imageBand: imageMean(imageBand))
 

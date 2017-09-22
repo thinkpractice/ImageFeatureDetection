@@ -30,18 +30,51 @@ class VarianceExtractor(FeatureExtractor):
     def extractFeatureValues(self, image):
         return ImageStatistics.rgbImageVariance(image)
 
+class PercentileExtractor(FeatureExtractor):
+    def __init__(self):
+        super().__init__(["q1R", "q1G","q1B","q2R", "q2G","q2B","q3R", "q3G","q3B"])
+
+    def extractFeatureValues(self, image):
+        percentiles =[]
+        for q in [25,50,75]:
+            percentiles.extend(ImageStatistics.rgbPercentile(image, q))
+        return percentiles
+
+class MinMaxExtractor(FeatureExtractor):
+    def __init__(self):
+        super().__init__(["minR","minG", "minB", "maxR","maxG", "maxB"])
+
+    def extractFeatureValues(self, image):
+        features = ImageStatistics.rgbMinima(image)
+        features.extend(ImageStatistics.rgbMaxima(image))
+        return features
+
+class Preprocessor(object):
+    @property
+    def prefix(self):
+        return ""
+
+    def process(self, image):
+        return image
+
 class FeatureExtractorCollection(object):
     @property
     def featureExtractors(self):
         return [MeanExtractor(),
-                VarianceExtractor()]
+                VarianceExtractor(),
+                PercentileExtractor(),
+                MinMaxExtractor()]
 
     @property
     def header(self):
         header = ["filename"]
-        header.extend([fieldName for featureExtractor in self.featureExtractors for fieldName in featureExtractor.fields])
+        header.extend(["{}{}".format(preprocessor.prefix, fieldName) for preprocessor in self.preprocessors for featureExtractor in self.featureExtractors for fieldName in featureExtractor.fields])
         header.append("class")
         return header
+
+    @property
+    def preprocessors(self):
+        return [Preprocessor()]
 
     def getImageFilenames(self, directory):
         return [os.path.join(directory, filename) for filename in glob.glob1(directory, "*.png")]
@@ -51,8 +84,10 @@ class FeatureExtractorCollection(object):
         for filename in self.getImageFilenames(directory):
             featureRow = [filename]
             image = imread(filename)
-            for featureExtractor in self.featureExtractors:
-                featureRow.extend(featureExtractor.extractFeatureValues(image))
+            for preprocessor in self.preprocessors:
+                processedImage = preprocessor.process(image)
+                for featureExtractor in self.featureExtractors:
+                    featureRow.extend(featureExtractor.extractFeatureValues(processedImage))
             featureRow.append(1 if arePositives else 0)
             features.append(featureRow)
         return features
