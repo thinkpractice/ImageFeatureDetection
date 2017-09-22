@@ -6,17 +6,35 @@ import sys
 import os
 
 class FeatureExtractor(object):
+    def __init__(self, fields):
+        self.__fields = fields
+
     @property
     def fields(self):
-        return []
+        return self.__fields
 
     def extractFeatureValues(self, image):
         return []
 
+class MeanExtractor(FeatureExtractor):
+    def __init__(self):
+        super().__init__(["meanR", "meanG", "meanB"])
+
+    def extractFeatureValues(self, image):
+        return ImageStatistics.rgbImageMean(image)
+
+class VarianceExtractor(FeatureExtractor):
+    def __init__(self):
+        super().__init__(["varR", "varG", "varB"])
+
+    def extractFeatureValues(self, image):
+        return ImageStatistics.rgbImageVariance(image)
+
 class FeatureExtractorCollection(object):
     @property
     def featureExtractors(self):
-        return []
+        return [MeanExtractor(),
+                VarianceExtractor()]
 
     @property
     def header(self):
