@@ -16,6 +16,9 @@ def imageCovariance(image1, image2):
 def imageVariance(image):
     return imageCovariance(image, image)
 
+def rescaleImage(image):
+    return (image - image.min()) / (image.max() - image.min())
+
 def linearCorrelation(image1, image2):
     return imageCovariance(image1, image2) / math.sqrt(imageVariance(image1) * imageVariance(image2))
 
@@ -30,6 +33,10 @@ def rgbCenterImage(image):
 
 def rgbImageVariance(image):
     return rgbApply(image, lambda imageBand: imageVariance(imageBand))
+
+def rgbRescaleImage(image):
+    rescaledImages = [rescaleImage(image[:,:,i]) for i in range(3)]
+    return np.stack(rescaledImages, axis=2)
 
 def rgbImageCovarianceMatrix(rgbImage):
     covarianceMatrix = np.zeros([3,3])
@@ -50,7 +57,7 @@ def pca(rgbImage):
 def pcaTransform(rgbImage):
     u,s,v = pca(rgbImage)
     imageVector = flattenImage(rgbImage)
-    transposedVector = imageVector.dot(v)
+    transposedVector = imageVector.dot(u)
     return transposedVector.reshape(rgbImage.shape)
 
 def fractionOfInformation(rgbImage):

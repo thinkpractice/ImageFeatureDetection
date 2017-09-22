@@ -18,10 +18,15 @@ def main(argv):
     centeredImage = ImageStatistics.rgbCenterImage(image / 255)
     print("centered image shape={}".format(centeredImage.shape))
     transformedImage = ImageStatistics.pcaTransform(centeredImage)
+    rescaledImage = ImageStatistics.rgbRescaleImage(transformedImage)
     
-    f, axes = plt.subplots(1,2)
+
+
+    f, axes = plt.subplots(1,4)
     axes[0].imshow(image)
-    axes[1].imshow(transformedImage)
+    axes[1].imshow(rescaledImage[:,:,0])
+    axes[2].imshow(rescaledImage[:,:,1])
+    axes[3].imshow(rescaledImage[:,:,2])
 
     f2 = plt.figure(2)
     ax2 = f2.add_subplot(121, projection='3d')

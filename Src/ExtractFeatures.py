@@ -46,15 +46,16 @@ class FeatureExtractorCollection(object):
     def getImageFilenames(self, directory):
         return [os.path.join(directory, filename) for filename in glob.glob1(directory, "*.png")]
 
-    def extractFeatures(directory, arePositives):
+    def extractFeatures(self, directory, arePositives):
         features = []
-        for filename in self.getImageFilenames():
+        for filename in self.getImageFilenames(directory):
             featureRow = [filename]
             image = imread(filename)
             for featureExtractor in self.featureExtractors:
-                featureRow.extend(featureExtractor.extractFeatures(image))
+                featureRow.extend(featureExtractor.extractFeatureValues(image))
             featureRow.append(1 if arePositives else 0)
             features.append(featureRow)
+        return features
 
 def saveFeatures(filename, header, features):
     with open(filename, "w") as csvFile:
@@ -73,7 +74,7 @@ def main(argv):
     negatives = featureExtractor.extractFeatures(argv[2], False)
     allCases = positives
     allCases.extend(negatives)
-    saveFeatures(argv[2], featureExtractor.header, allCases)
+    saveFeatures(argv[3], featureExtractor.header, allCases)
 
 if __name__ == "__main__":
     main(sys.argv)
