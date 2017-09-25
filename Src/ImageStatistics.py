@@ -1,4 +1,5 @@
 from skimage.measure import shannon_entropy
+from skimage.exposure import adjust_sigmoid
 import numpy as np
 import math
 
@@ -50,6 +51,9 @@ def rgbEntropy(image):
 
 def rgbCenterImage(image):
     return np.stack(rgbApply(image, lambda imageBand: centerImage(imageBand)),axis=2)
+
+def rgbAdjustSigmoid(image):
+    return np.stack(rgbApply(image, lambda imageBand: adjust_sigmoid(imageBand)), axis=2)
 
 def rgbImageVariance(image):
     return rgbApply(image, lambda imageBand: imageVariance(imageBand))

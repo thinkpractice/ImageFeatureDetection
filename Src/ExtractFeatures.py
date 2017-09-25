@@ -1,5 +1,6 @@
 from skimage.io import imread
 from skimage.color import rgb2hsv
+import numpy as np
 import ImageStatistics
 import glob
 import csv
@@ -85,6 +86,23 @@ class HsvPreprocessor(Preprocessor):
     def process(self, image):
         return rgb2hsv(image)
 
+class ExposurePreprocessor(Preprocessor):
+    def __init__(self):
+        super().__init__("exposure_")
+
+    def process(self, image):
+        return ImageStatistics.rgbAdjustSigmoid(image)
+
+class SubstractionPreprocessor(Preprocessor):
+    def __init__(self):
+        super().__init__("substract_".format())
+    
+    def process(self, image):
+        redMinGreen = image[:,:,0] - image[:,:,1]
+        redMinBlue = image[:,:,0] - image[:,:,2]
+        greenMinBlue = image[:,:,1] - image[:,:,2]
+        return np.stack([redMinGreen, redMinBlue, greenMinBlue], axis=2)
+
 class FeatureExtractorCollection(object):
     @property
     def featureExtractors(self):
@@ -92,13 +110,17 @@ class FeatureExtractorCollection(object):
                 VarianceExtractor(),
                 PercentileExtractor(),
                 MinMaxExtractor(),
-                EntropyExtractor()]
+                EntropyExtractor(),
+                ]
 
     @property
     def preprocessors(self):
         return [Preprocessor(),
                 PcaPreprocessor(),
-                HsvPreprocessor()]
+                HsvPreprocessor(),
+                ExposurePreprocessor(),
+                SubstractionPreprocessor()
+                ]
 
     @property
     def header(self):
