@@ -1,3 +1,4 @@
+from skimage.measure import shannon_entropy
 import numpy as np
 import math
 
@@ -15,6 +16,10 @@ def imageCovariance(image1, image2):
 
 def imageVariance(image):
     return imageCovariance(image, image)
+
+def imageEntropy(image):
+    entropy = shannon_entropy(image)
+    return entropy if not np.isinf(entropy) else 0
 
 def rescaleImage(image):
     return (image - image.min()) / (image.max() - image.min())
@@ -39,6 +44,9 @@ def rgbPercentile(image, q):
 
 def rgbImageMean(image):
     return rgbApply(image, lambda imageBand: imageMean(imageBand))
+
+def rgbEntropy(image):
+    return rgbApply(image, lambda imageBand: imageEntropy(imageBand))
 
 def rgbCenterImage(image):
     return np.stack(rgbApply(image, lambda imageBand: centerImage(imageBand)),axis=2)

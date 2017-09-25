@@ -1,4 +1,5 @@
 from skimage.io import imread
+from skimage.color import rgb2hsv
 import ImageStatistics
 import glob
 import csv
@@ -49,6 +50,13 @@ class MinMaxExtractor(FeatureExtractor):
         features.extend(ImageStatistics.rgbMaxima(image))
         return features
 
+class EntropyExtractor(FeatureExtractor):
+    def __init__(self):
+        super().__init__(["entropyR", "entropyG", "entropyB"])
+
+    def extractFeatureValues(self, image):
+        return ImageStatistics.rgbEntropy(image)
+
 class CountColorExtractor(FeatureExtractor):
     pass
 
@@ -70,18 +78,27 @@ class PcaPreprocessor(Preprocessor):
     def process(self, image):
         return ImageStatistics.pcaTransform(image)
 
+class HsvPreprocessor(Preprocessor):
+    def __init__(self):
+        super().__init__("hsv_")
+
+    def process(self, image):
+        return rgb2hsv(image)
+
 class FeatureExtractorCollection(object):
     @property
     def featureExtractors(self):
         return [MeanExtractor(),
                 VarianceExtractor(),
                 PercentileExtractor(),
-                MinMaxExtractor()]
+                MinMaxExtractor(),
+                EntropyExtractor()]
 
     @property
     def preprocessors(self):
         return [Preprocessor(),
-                PcaPreprocessor()]
+                PcaPreprocessor(),
+                HsvPreprocessor()]
 
     @property
     def header(self):
