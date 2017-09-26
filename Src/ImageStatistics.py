@@ -78,10 +78,26 @@ def pca(rgbImage):
     covarianceMatrix = rgbImageCovarianceMatrix(rgbImage)
     return np.linalg.svd(covarianceMatrix)
 
+def reorderMatrix(u):
+    c1 = np.array([1/3 * math.sqrt(3) for _ in range(3)])
+    c2 = np.array([1, -1, -1] * c1)
+    c3 = np.array([0, -1/2 * math.sqrt(2), 1/2 * math.sqrt(2)])
+    v1 = u.dot(c2)
+    i1 = np.argmax(v1)
+    v2 = u.dot(c3)
+    i2 = np.argmax(v2)
+    if i1 == 2 and i2 == 1:
+        temp = u[i1]
+        u[i1] =  u[i2]
+        u[i2] = temp
+    return u
+
 def pcaTransform(rgbImage):
     u,s,v = pca(rgbImage)
     imageVector = flattenImage(rgbImage)
-    transposedVector = imageVector.dot(u)
+    transposedVector = imageVector.dot(reorderMatrix(u))
+    #print(u)
+    #print(s)
     return transposedVector.reshape(rgbImage.shape)
 
 def fractionOfInformation(rgbImage):

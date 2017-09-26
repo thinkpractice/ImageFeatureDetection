@@ -2,6 +2,7 @@ from skimage.io import imread
 from matplotlib import pyplot as plt
 from scipy.stats import skew
 from scipy.stats import kurtosis
+from skimage.measure import shannon_entropy
 import sys
 import math
 
@@ -51,6 +52,8 @@ def calc(filteredImage, ax, componentIndex, colors):
 
 def plotHistograms(axes, image, numberOfImages, fileIndex):
     colors = ["red", "green", "blue", "black", "purple", "black", "orange","black"]
+    redMinusBlue = image[:,:,0] - image[:,:,2]
+    print("entropy={}".format(shannon_entropy(redMinusBlue)))
     for componentIndex in range(9):
         if numberOfImages == 1:
             ax = axes[componentIndex]

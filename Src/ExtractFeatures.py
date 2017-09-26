@@ -77,7 +77,8 @@ class PcaPreprocessor(Preprocessor):
         super().__init__("pca_")
 
     def process(self, image):
-        return ImageStatistics.pcaTransform(image)
+        pcaImage = ImageStatistics.pcaTransform(image)
+        return ImageStatistics.rescaleImage(pcaImage) * 255
 
 class HsvPreprocessor(Preprocessor):
     def __init__(self):
