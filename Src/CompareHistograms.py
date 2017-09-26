@@ -5,6 +5,7 @@ from scipy.stats import kurtosis
 from skimage.measure import shannon_entropy
 import sys
 import math
+import ImageStatistics
 
 def filterImage(image):
     #filter black background color out of the image
@@ -61,6 +62,7 @@ def plotHistograms(axes, image, numberOfImages, fileIndex):
             ax = axes[fileIndex, componentIndex]
         
         filteredImage = filterImage(image)
+        #filteredImage = ImageStatistics.pcaTransform(image).reshape(image.shape[0]*image.shape[1],3)
         calc(filteredImage, ax, componentIndex, colors)
         if componentIndex == 8:
             ax.imshow(image)

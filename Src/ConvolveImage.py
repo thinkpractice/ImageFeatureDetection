@@ -1,4 +1,5 @@
 from skimage.io import imread
+from skimage.segmentation import slic
 from scipy.ndimage.filters import convolve
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
