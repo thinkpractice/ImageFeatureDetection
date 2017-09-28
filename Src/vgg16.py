@@ -73,7 +73,7 @@ class AccuracyHistory(Callback):
         self.acc.append(logs.get('acc'))
 
 def getImagesInDirectory(directory):
-    for filename in glob.glob1(directory, "*.png", recursive=True):
+    for filename in glob.glob(os.path.join(directory, "*.png"), recursive=True):
         yield os.path.join(directory, filename)
 
 def padImage(image, newWidth, newHeight):
@@ -92,11 +92,6 @@ def loadImages(directory):
 
 def countImages(directory):
     return len([item for item in getImagesInDirectory(directory)])
-
-def countAllImages(trainDirectory, testDirectory):
-    numberOfImages = countImages(trainDirectory)
-    numberOfImages += countImages(testDirectory)
-    return numberOfImages
 
 def loadData(trainDirectory, testDirectory, batchSize):
     train_datagen = ImageDataGenerator()
@@ -133,8 +128,8 @@ def main(argv):
     batchSize = 32
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
-    numberOfTrainingImages = 3000 #countAllImages(trainDirectory, testDirectory)
-    numberOfValidationImages = numberOfTrainingImages
+    numberOfTrainingImages = countImages(trainDirectory)
+    numberOfValidationImages = countImages(testDirectory)
     print(numberOfValidationImages)
     # Test pretrained model
     #model = VGG_16('vgg16_weights.h5')
