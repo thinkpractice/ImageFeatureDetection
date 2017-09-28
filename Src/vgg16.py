@@ -1,6 +1,6 @@
 from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
-from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
+from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
 from keras.callbacks import Callback
 from skimage.io import imread
@@ -14,40 +14,40 @@ import glob
 
 def VGG_16(weights_path=None):
     model = Sequential()
-    model.add(ZeroPadding2D((1,1),input_shape=(3,224,224)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1,1),input_shape=(224,224, 3)))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(MaxPooling2D((2,2), strides=(2,2)))
 
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
+    model.add(Conv2D(128, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
+    model.add(Conv2D(128, (3, 3), activation='relu'))
     model.add(MaxPooling2D((2,2), strides=(2,2)))
 
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
+    model.add(Conv2D(256, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
+    model.add(Conv2D(256, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
+    model.add(Conv2D(256, (3, 3), activation='relu'))
     model.add(MaxPooling2D((2,2), strides=(2,2)))
 
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(Conv2D(512, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(Conv2D(512, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(Conv2D(512, (3, 3), activation='relu'))
     model.add(MaxPooling2D((2,2), strides=(2,2)))
 
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(Conv2D(512, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(Conv2D(512, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(Conv2D(512, (3, 3), activation='relu'))
     model.add(MaxPooling2D((2,2), strides=(2,2)))
 
     model.add(Flatten())
@@ -75,7 +75,6 @@ def getImagesInDirectory(directory):
         yield os.path.join(directory, filename)
 
 def padImage(image, newWidth, newHeight):
-    print(image.shape)
     extraRows = newWidth - image.shape[0]
     extraColumns = newHeight - image.shape[1]
     paddedChannels = [np.pad(image[:,:,i],((0, extraRows), (0, extraColumns)), mode="constant",constant_values=0) for i in range(3)]
@@ -87,7 +86,7 @@ def loadImages(directory):
         if image.shape[0] > 224 or image.shape[1] > 224:
             yield resize(image, (224, 224))
         else:
-            yield padImage(image, 224, 224)
+            yield image #padImage(image, 224, 224)
 
 def loadData(positivesDirectory, negativesDirectory):
     x = []
