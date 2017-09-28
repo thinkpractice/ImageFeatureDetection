@@ -86,21 +86,29 @@ def loadImages(directory):
         if image.shape[0] > 224 or image.shape[1] > 224:
             yield resize(image, (224, 224))
         else:
-            yield image #padImage(image, 224, 224)
+            yield padImage(image, 224, 224)
 
 def loadData(positivesDirectory, negativesDirectory):
     x = []
     y = []
 
-    positives = [image for image in loadImages(positivesDirectory)]
-    x.extend(positives)
-    y.extend([1 for _ in range(len(positives))])
+    positives = 0
+    for image in loadImages(positivesDirectory):
+        x.append(image)
+        positives += 1
+    y.extend([1 for _ in range(positives)])
 
-    negatives = [image for image in loadImages(negativesDirectory)]
-    x.extend(negatives)
-    y.extend([0 for _ in range(len(negatives))])
+    negatives = 0
+    for image in loadImages(negativesDirectory):
+        x.append(image)
+        negatives += 1
+    y.extend([0 for _ in range(negatives)])
 
-    return train_test_split(x,y)
+    x = np.array(x)
+    print(x.shape)
+
+    x_train, x_test, y_train, y_test = train_test_split(x,y)
+    return np.array(x_train), np.array(x_test), np.array(y_train), np.array(y_test)
 
 def main(argv):
     if len(argv) <= 2:
