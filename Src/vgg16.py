@@ -3,6 +3,7 @@ from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
 from keras.callbacks import Callback
+from keras.preprocessing.image import ImageDataGenerator
 from skimage.io import imread
 from skimage.transform import resize
 from sklearn.model_selection import train_test_split
@@ -56,7 +57,8 @@ def VGG_16(weights_path=None):
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     #model.add(Dense(1000, activation='softmax'))
-    model.add(Dense(2, activation='softmax'))
+    #model.add(Dense(2, activation='softmax'))
+    model.add(Dense(1, activation="tanh"))
 
     if weights_path:
         model.load_weights(weights_path)
@@ -71,7 +73,7 @@ class AccuracyHistory(Callback):
         self.acc.append(logs.get('acc'))
 
 def getImagesInDirectory(directory):
-    for filename in glob.glob1(directory, "*.png"):
+    for filename in glob.glob1(directory, "*.png", recursive=True):
         yield os.path.join(directory, filename)
 
 def padImage(image, newWidth, newHeight):
@@ -89,94 +91,69 @@ def loadImages(directory):
             yield padImage(image, 224, 224)
 
 def countImages(directory):
-    return len(getImagesInDirectory(directory))
+    return len([item for item in getImagesInDirectory(directory)])
 
-def countAllImages(positivesDirectory, negativesDirectory):
-    numberOfImages = countImages(positivesDirectory)
-    numberOfImages += countImages(negativesDirectory)
+def countAllImages(trainDirectory, testDirectory):
+    numberOfImages = countImages(trainDirectory)
+    numberOfImages += countImages(testDirectory)
     return numberOfImages
 
-def loadDatav(positivesDirectory, negativesDirectory, batchSize):
-    train_datagen = ImageDataGenerator(
-        rescale=1./255,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True)
+def loadData(trainDirectory, testDirectory, batchSize):
+    train_datagen = ImageDataGenerator()
+#        rescale=1./255,
+#        shear_range=0.2,
+#        zoom_range=0.2,
+#        horizontal_flip=True)
 
-    test_datagen = ImageDataGenerator(rescale=1./255)
+    test_datagen = ImageDataGenerator()#rescale=1./255)
 
     train_generator = train_datagen.flow_from_directory(
-        'data/train',
+        trainDirectory,
         target_size=(224, 224),
         batch_size=batchSize,
         class_mode='binary')
 
     validation_generator = test_datagen.flow_from_directory(
-        'data/validation',
+        testDirectory,
         target_size=(224, 224),
         batch_size=batchSize,
         class_mode='binary')
 
-#    x = []
-#
-#    y = []
-#
-#    positives = 0
-#    for image in loadImages(positivesDirectory):
-#        x.append(image)
-#        positives += 1
-#    y.extend([1 for _ in range(positives)])
-#
-#    negatives = 0
-#    for image in loadImages(negativesDirectory):
-#        x.append(image)
-#        negatives += 1
-#    y.extend([0 for _ in range(negatives)])
-#
-#    x = np.array(x)
-#    print(x.shape)
-#
-#    x_train, x_test, y_train, y_test = train_test_split(x,y)
-#    return np.array(x_train), np.array(x_test), np.array(y_train), np.array(y_test)
     return train_generator, validation_generator
 
 def main(argv):
     if len(argv) <= 2:
-        print("usage: vgg16.py <positivesDirectory> <negativesDirectory>")
+        print("usage: vgg16.py <trainDirectory> <testDirectory>")
         exit(1)
 
-    positivesDirectory = argv[1]
-    negativesDirectory = argv[2]
+    trainDirectory = argv[1]
+    testDirectory = argv[2]
 
     epochs = 10
-    batch_size=32
+    batchSize = 32
     print("Loading data...")
-    train_generator, validation_generator = loadData(positivesDirectory, negativesDirectory, batchSize)
-    numberOfTrainingImages = countAllImages(positivesDirectory, negativesDirectory)
+    train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
+    numberOfTrainingImages = 3000 #countAllImages(trainDirectory, testDirectory)
     numberOfValidationImages = numberOfTrainingImages
+    print(numberOfValidationImages)
     # Test pretrained model
     #model = VGG_16('vgg16_weights.h5')
     print("Compiling model...")
     model = VGG_16()
     sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=["accuracy"])
+    model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
     history = AccuracyHistory()
-    #model.fit(x_train, y_train,
-    #      batch_size=batch_size,
-    #      epochs=epochs,
-    #      verbose=1,
-    #      validation_data=(x_test, y_test),
-    #      callbacks=[history])
     
     model.fit_generator(
         train_generator,
-        steps_per_epoch=numberOfImages/batchSize,
+        steps_per_epoch=numberOfTrainingImages/batchSize,
         epochs=epochs,
         verbose=1,
         validation_data=validation_generator,
         validation_steps=numberOfValidationImages/batchSize)
+
     score = model.evaluate(x_test, y_test, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
