@@ -88,27 +88,57 @@ def loadImages(directory):
         else:
             yield padImage(image, 224, 224)
 
-def loadData(positivesDirectory, negativesDirectory):
-    x = []
-    y = []
+def countImages(directory):
+    return len(getImagesInDirectory(directory))
 
-    positives = 0
-    for image in loadImages(positivesDirectory):
-        x.append(image)
-        positives += 1
-    y.extend([1 for _ in range(positives)])
+def countAllImages(positivesDirectory, negativesDirectory):
+    numberOfImages = countImages(positivesDirectory)
+    numberOfImages += countImages(negativesDirectory)
+    return numberOfImages
 
-    negatives = 0
-    for image in loadImages(negativesDirectory):
-        x.append(image)
-        negatives += 1
-    y.extend([0 for _ in range(negatives)])
+def loadDatav(positivesDirectory, negativesDirectory, batchSize):
+    train_datagen = ImageDataGenerator(
+        rescale=1./255,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
 
-    x = np.array(x)
-    print(x.shape)
+    test_datagen = ImageDataGenerator(rescale=1./255)
 
-    x_train, x_test, y_train, y_test = train_test_split(x,y)
-    return np.array(x_train), np.array(x_test), np.array(y_train), np.array(y_test)
+    train_generator = train_datagen.flow_from_directory(
+        'data/train',
+        target_size=(224, 224),
+        batch_size=batchSize,
+        class_mode='binary')
+
+    validation_generator = test_datagen.flow_from_directory(
+        'data/validation',
+        target_size=(224, 224),
+        batch_size=batchSize,
+        class_mode='binary')
+
+#    x = []
+#
+#    y = []
+#
+#    positives = 0
+#    for image in loadImages(positivesDirectory):
+#        x.append(image)
+#        positives += 1
+#    y.extend([1 for _ in range(positives)])
+#
+#    negatives = 0
+#    for image in loadImages(negativesDirectory):
+#        x.append(image)
+#        negatives += 1
+#    y.extend([0 for _ in range(negatives)])
+#
+#    x = np.array(x)
+#    print(x.shape)
+#
+#    x_train, x_test, y_train, y_test = train_test_split(x,y)
+#    return np.array(x_train), np.array(x_test), np.array(y_train), np.array(y_test)
+    return train_generator, validation_generator
 
 def main(argv):
     if len(argv) <= 2:
@@ -119,10 +149,11 @@ def main(argv):
     negativesDirectory = argv[2]
 
     epochs = 10
-    batch_size=128
+    batch_size=32
     print("Loading data...")
-    x_train, x_test, y_train, y_test = loadData(positivesDirectory, negativesDirectory)
-
+    train_generator, validation_generator = loadData(positivesDirectory, negativesDirectory, batchSize)
+    numberOfTrainingImages = countAllImages(positivesDirectory, negativesDirectory)
+    numberOfValidationImages = numberOfTrainingImages
     # Test pretrained model
     #model = VGG_16('vgg16_weights.h5')
     print("Compiling model...")
@@ -132,13 +163,20 @@ def main(argv):
 
     print("Training model...")
     history = AccuracyHistory()
-    model.fit(x_train, y_train,
-          batch_size=batch_size,
-          epochs=epochs,
-          verbose=1,
-          validation_data=(x_test, y_test),
-          callbacks=[history])
+    #model.fit(x_train, y_train,
+    #      batch_size=batch_size,
+    #      epochs=epochs,
+    #      verbose=1,
+    #      validation_data=(x_test, y_test),
+    #      callbacks=[history])
     
+    model.fit_generator(
+        train_generator,
+        steps_per_epoch=numberOfImages/batchSize,
+        epochs=epochs,
+        verbose=1,
+        validation_data=validation_generator,
+        validation_steps=numberOfValidationImages/batchSize)
     score = model.evaluate(x_test, y_test, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
