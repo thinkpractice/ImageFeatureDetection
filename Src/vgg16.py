@@ -73,7 +73,9 @@ class AccuracyHistory(Callback):
         self.acc.append(logs.get('acc'))
 
 def getImagesInDirectory(directory):
-    for filename in glob.glob(os.path.join(directory, "*.png"), recursive=True):
+    imageDir = directory + "/**/*.png"
+    print(imageDir)
+    for filename in glob.glob(imageDir, recursive=True):
         yield os.path.join(directory, filename)
 
 def padImage(image, newWidth, newHeight):
@@ -129,6 +131,7 @@ def main(argv):
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
     numberOfTrainingImages = countImages(trainDirectory)
+    print(numberOfTrainingImages)
     numberOfValidationImages = countImages(testDirectory)
     print(numberOfValidationImages)
     # Test pretrained model
@@ -149,9 +152,11 @@ def main(argv):
         validation_data=validation_generator,
         validation_steps=numberOfValidationImages/batchSize)
 
-    score = model.evaluate(x_test, y_test, verbose=0)
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
+    model.save('zonnepanelen.h5')
+
+    #score = model.evaluate(x_test, y_test, verbose=0)
+    #print('Test loss:', score[0])
+    #print('Test accuracy:', score[1])
     #out = model.predict(im)
     #print np.argmax(out)
     plt.plot(range(1,epochs + 1),history.acc)
