@@ -57,8 +57,8 @@ def VGG_16(weights_path=None):
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     #model.add(Dense(1000, activation='softmax'))
-    #model.add(Dense(2, activation='softmax'))
-    model.add(Dense(1, activation="tanh"))
+    model.add(Dense(2, activation='softmax'))
+    #model.add(Dense(1, activation="sigmoid"))
 
     if weights_path:
         model.load_weights(weights_path)
@@ -96,25 +96,25 @@ def countImages(directory):
     return len([item for item in getImagesInDirectory(directory)])
 
 def loadData(trainDirectory, testDirectory, batchSize):
-    train_datagen = ImageDataGenerator()
+    train_datagen = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization=True, rescale=1./255)
 #        rescale=1./255,
 #        shear_range=0.2,
 #        zoom_range=0.2,
 #        horizontal_flip=True)
 
-    test_datagen = ImageDataGenerator()#rescale=1./255)
+    test_datagen = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization=True, rescale=1./255)
 
     train_generator = train_datagen.flow_from_directory(
         trainDirectory,
         target_size=(224, 224),
         batch_size=batchSize,
-        class_mode='binary')
+        class_mode='categorical')
 
     validation_generator = test_datagen.flow_from_directory(
         testDirectory,
         target_size=(224, 224),
         batch_size=batchSize,
-        class_mode='binary')
+        class_mode='categorical')
 
     return train_generator, validation_generator
 
@@ -126,7 +126,7 @@ def main(argv):
     trainDirectory = argv[1]
     testDirectory = argv[2]
 
-    epochs = 10
+    epochs = 1
     batchSize = 32
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
@@ -138,7 +138,7 @@ def main(argv):
     #model = VGG_16('vgg16_weights.h5')
     print("Compiling model...")
     model = VGG_16()
-    sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+    sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
