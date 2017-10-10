@@ -55,7 +55,7 @@ def VGG_16(weights_path=None):
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(4096, activation='relu'))
-    model.add(Dropout(0.5))
+    #model.add(Dropout(0.5))
     #model.add(Dense(1000, activation='softmax'))
     model.add(Dense(2, activation='softmax'))
     #model.add(Dense(1, activation="sigmoid"))
@@ -126,7 +126,7 @@ def main(argv):
     trainDirectory = argv[1]
     testDirectory = argv[2]
 
-    epochs = 1
+    epochs = 10
     batchSize = 32
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
@@ -138,8 +138,8 @@ def main(argv):
     #model = VGG_16('vgg16_weights.h5')
     print("Compiling model...")
     model = VGG_16()
-    sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9)#, nesterov=True)
+    model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
     history = AccuracyHistory()
