@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 def main(argv):
     filename = argv[1]
     image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-    blurredImage = cv2.GaussianBlur(image, (3,3), 0)
+    #blurredImage = cv2.GaussianBlur(image, (3,3), 0)
 
     mser = cv2.MSER_create()
     mser_areas, _ = mser.detectRegions(image)
@@ -26,7 +26,7 @@ def main(argv):
 
     fig, axes = plt.subplots(1,2+len(maskedImages))
     axes[0].imshow(image)
-    axes[1].imshow(blurredImage)
+    axes[1].imshow(image)
     for i in range(len(maskedImages)):
         axes[2+i].imshow(maskedImages[i])
     #axes[1].scatter(hulls[:,0], hulls[:,1])
