@@ -6,6 +6,7 @@ import glob
 import csv
 import sys
 import os
+import cv2
 
 class FeatureExtractor(object):
     def __init__(self, fields):
@@ -14,6 +15,9 @@ class FeatureExtractor(object):
     @property
     def fields(self):
         return self.__fields
+
+    def handles(self, preprocessor):
+        return True
 
     def extractFeatureValues(self, image):
         return []
@@ -57,6 +61,31 @@ class EntropyExtractor(FeatureExtractor):
 
     def extractFeatureValues(self, image):
         return ImageStatistics.rgbEntropy(image)
+
+class MSERExtractor(FeatureExtractor):
+    def __init__(self):
+        super().__init__(["mser_{}".format(i) for i in range(10)])
+
+    def handles(self, preprocessor):
+        return type(preprocessor) == Preprocessor
+
+    def extractFeatureValues(self, image):
+        mser = cv2.MSER_create()
+        areas, _ = mser.detectRegions(cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+        hulls = [cv2.convexHull(p.reshape(-1, 1,2)) for p in areas]
+        maskedImages = []
+        for contour in hulls:
+            mask = np.zeros(image.shape, dtype=np.uint8)
+            cv2.drawContours(mask, [contour], -1, (255,255,255), -1)
+            maskedImages.append(image * mask)
+        pcaStatistics = []
+        for image in maskedImages:
+            pcaStatistics.extend(ImageStatistics.pca(image)[1])
+        pcaStatLength = len(pcaStatistics)
+        if pcaStatLength < 10:
+            pcaStatistics.extend([0 for i in range(10 - pcaStatLength)])
+        
+        return sorted(pcaStatistics, reverse=True)[0:10]
 
 class CountColorExtractor(FeatureExtractor):
     pass
@@ -112,6 +141,7 @@ class FeatureExtractorCollection(object):
                 PercentileExtractor(),
                 MinMaxExtractor(),
                 EntropyExtractor(),
+                MSERExtractor()
                 ]
 
     @property
@@ -126,7 +156,7 @@ class FeatureExtractorCollection(object):
     @property
     def header(self):
         header = ["filename"]
-        header.extend(["{}{}".format(preprocessor.prefix, fieldName) for preprocessor in self.preprocessors for featureExtractor in self.featureExtractors for fieldName in featureExtractor.fields])
+        header.extend(["{}{}".format(preprocessor.prefix, fieldName) for preprocessor in self.preprocessors for featureExtractor in self.featureExtractors for fieldName in featureExtractor.fields if featureExtractor.handles(preprocessor)])
         header.append("class")
         return header
 
@@ -141,7 +171,8 @@ class FeatureExtractorCollection(object):
             for preprocessor in self.preprocessors:
                 processedImage = preprocessor.process(image)
                 for featureExtractor in self.featureExtractors:
-                    featureRow.extend(featureExtractor.extractFeatureValues(processedImage))
+                    if featureExtractor.handles(preprocessor):
+                        featureRow.extend(featureExtractor.extractFeatureValues(processedImage))
             featureRow.append(1 if arePositives else 0)
             features.append(featureRow)
         return features

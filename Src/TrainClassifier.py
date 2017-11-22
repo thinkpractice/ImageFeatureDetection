@@ -13,7 +13,8 @@ def loadFeatures(filename):
         y = []
         header = next(csvReader)
         for row in csvReader:
-            x.append([float(cell) for cell in row[1:-1]])
+            featureVector = [float(cell) for cell in row[1:-1]]
+            x.append(featureVector)
             y.append(int(row[-1]))
         return header, np.array(x), np.array(y)
 
@@ -52,9 +53,10 @@ def main(argv):
         exit(1)
     header, features, classifications = loadFeatures(argv[1])
     print(classifications)
-    print(features)
+    print(len(features))
 
     featureNames = header[1:-1]
+    print(len(featureNames))
     clf = trainAndEvaluate(featureNames, features, classifications,"tree1")
 
     filteredFeatures = filterOnFeatureImportance(features, clf.feature_importances_)
