@@ -1,5 +1,6 @@
 from skimage.io import imread
 from skimage.color import rgb2hsv
+from statistics import mean, median
 import numpy as np
 import ImageStatistics
 import glob
@@ -64,14 +65,20 @@ class EntropyExtractor(FeatureExtractor):
 
 class MSERExtractor(FeatureExtractor):
     def __init__(self):
-        super().__init__(["mser_{}".format(i) for i in range(10)])
+        super().__init__(["minWidth", "minHeight", "medianWidth", "medianHeight", "meanWidth", "meanHeight", "maxWidth", "maxHeight"] + ["mser_{}".format(i) for i in range(10)])
 
     def handles(self, preprocessor):
         return type(preprocessor) == Preprocessor
 
+    def getMinAndMaxSizes(self, boundingBoxes):
+        widths = [box[2] for box in boundingBoxes]
+        heights = [box[3] for box in boundingBoxes]
+
+        return min(widths), min(heights), median(widths), median(heights), mean(widths), mean(heights), max(widths), max(heights)
+
     def extractFeatureValues(self, image):
         mser = cv2.MSER_create()
-        areas, _ = mser.detectRegions(cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+        areas, boundingBoxes = mser.detectRegions(cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
         hulls = [cv2.convexHull(p.reshape(-1, 1,2)) for p in areas]
         maskedImages = []
         for contour in hulls:
@@ -85,7 +92,8 @@ class MSERExtractor(FeatureExtractor):
         if pcaStatLength < 10:
             pcaStatistics.extend([0 for i in range(10 - pcaStatLength)])
         
-        return sorted(pcaStatistics, reverse=True)[0:10]
+        boxSizes = self.getMinAndMaxSizes(boundingBoxes)
+        return list(boxSizes) + sorted(pcaStatistics, reverse=True)[0:10]
 
 class CountColorExtractor(FeatureExtractor):
     pass

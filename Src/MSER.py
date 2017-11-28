@@ -5,11 +5,13 @@ from matplotlib import pyplot as plt
 
 def main(argv):
     filename = argv[1]
+    colorImage = cv2.imread(filename)
     image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
     #blurredImage = cv2.GaussianBlur(image, (3,3), 0)
 
     mser = cv2.MSER_create()
-    mser_areas, _ = mser.detectRegions(image)
+    mser_areas, bboxes = mser.detectRegions(image)
+    print(bboxes)
     print(len(mser_areas))
     #image2 = image.copy()
     hulls = [cv2.convexHull(p.reshape(-1, 1,2)) for p in mser_areas]
@@ -25,7 +27,7 @@ def main(argv):
         maskedImages.append(cv2.bitwise_and(image, image, mask=mask))
 
     fig, axes = plt.subplots(1,2+len(maskedImages))
-    axes[0].imshow(image)
+    axes[0].imshow(colorImage)
     axes[1].imshow(image)
     for i in range(len(maskedImages)):
         axes[2+i].imshow(maskedImages[i])
