@@ -6,6 +6,23 @@ from keras.callbacks import Callback
 from keras.preprocessing.image import ImageDataGenerator
 import sys
 
+class ImageGenerator(object):
+    #TODO settings param instead of directory?
+    def __init__(self, directory):
+        self.__directory = directory
+
+    @property
+    def directory(self):
+        return self.__directory
+
+    @property
+    def numberOfImages(self):
+        return 0
+
+    @property
+    def images(self):
+        return []
+
 def cnn():
     model = Sequential()
     return model
@@ -32,6 +49,7 @@ def trainModel(model, epochs, batchSize):
 
 def main(argv):
     if len(argv) <= 3:
+        #TODO instead pass a config file with all the settings for training
         print("usage: cnn.py <trainDirectory> <testDirectory> <#epochs>")
         exit(1)
 
