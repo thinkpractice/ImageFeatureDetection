@@ -36,10 +36,17 @@ class OSMCities(object):
         return None
 
     def getBoundingBoxForCity(self, cityName):
-        query = '(rel[name="{}"];>;);out;'.format(cityName)
+        query = '(rel[name="{}"];>;);out geom;'.format(cityName)
         result = self.overApi.query(query)
-        latitudes = [float(node.lat) for node in result.nodes]
-        longitudes = [float(node.lon) for node in result.nodes]
+        relation = result.relations[0]
+        geometries = []
+        for member in relation.members:
+            if not member.geometry:
+                continue
+            for geometry in member.geometry:
+                geometries.append(geometry)
+        latitudes = [float(geometry.lat) for geometry in geometries]
+        longitudes = [float(geometry.lon) for geometry in geometries]
         return (min(latitudes), min(longitudes), max(latitudes), max(longitudes))
 
     def performCityQuery(self, countryName):
