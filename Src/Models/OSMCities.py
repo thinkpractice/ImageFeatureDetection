@@ -52,3 +52,6 @@ class OSMCities(object):
     def performCityQuery(self, countryName):
         query = 'area[name="{}"];(node[place~"^(city|town)$"](area););out;'
         return self.overApi.query(query.format(countryName))
+
+    def getCitiesForBoundingBox(self, boundingBox):
+        pass
