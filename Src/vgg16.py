@@ -20,18 +20,20 @@ def VGG_16(weights_path=None):
     model = Sequential()
     model.add(Conv2D(16, (3, 3), activation='relu', input_shape=(image_height, image_width, 3)))
     model.add(MaxPooling2D((2,2)))
-
+    model.add(Dropout(0.2))
     #input 24x24x3
     model.add(Conv2D(32, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(MaxPooling2D((2,2)))
 
+    model.add(Dropout(0.2))
     #input 12x12x3
     model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(MaxPooling2D((2,2)))
 
+    model.add(Dropout(0.2))
     #input 6x6x3
     model.add(Conv2D(128, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(MaxPooling2D((2,2)))
      
     #input 4x4x3
     #model.add(Conv2D(256, (3, 3), activation='relu'))
@@ -135,7 +137,7 @@ def main(argv):
     trainDirectory = argv[1]
     testDirectory = argv[2]
 
-    epochs = 30
+    epochs = 100
     batchSize = 32
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
@@ -148,7 +150,7 @@ def main(argv):
     print("Compiling model...")
     model = VGG_16()
     model.summary()
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    sgd = SGD(lr=0.01, decay=1e-6) # , momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
