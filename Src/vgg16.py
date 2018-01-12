@@ -2,7 +2,7 @@ from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
-from keras.callbacks import Callback
+from keras.callbacks import Callback, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
 from skimage.io import imread
 from skimage.transform import resize
@@ -13,9 +13,12 @@ import os
 import sys
 import glob
 
+image_width = 50
+image_height = 50
+
 def VGG_16(weights_path=None):
     model = Sequential()
-    model.add(ZeroPadding2D((1,1),input_shape=(224,224, 3)))
+    model.add(ZeroPadding2D((1,1),input_shape=(image_height, image_width, 3)))
     model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(ZeroPadding2D((1,1)))
     model.add(Conv2D(64, (3, 3), activation='relu'))
@@ -55,10 +58,8 @@ def VGG_16(weights_path=None):
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(4096, activation='relu'))
-    #model.add(Dropout(0.5))
-    #model.add(Dense(1000, activation='softmax'))
-    model.add(Dense(2, activation='softmax'))
-    #model.add(Dense(1, activation="sigmoid"))
+    model.add(Dropout(0.5))
+    model.add(Dense(1, activation="sigmoid"))
 
     if weights_path:
         model.load_weights(weights_path)
@@ -96,25 +97,27 @@ def countImages(directory):
     return len([item for item in getImagesInDirectory(directory)])
 
 def loadData(trainDirectory, testDirectory, batchSize):
-    train_datagen = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization=True, rescale=1./255)
-#        rescale=1./255,
-#        shear_range=0.2,
-#        zoom_range=0.2,
-#        horizontal_flip=True)
+    train_datagen = ImageDataGenerator(rescale=1./255,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True,
+        fill_mode="nearest")
 
-    test_datagen = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization=True, rescale=1./255)
+    test_datagen = ImageDataGenerator(rescale=1./255)
 
     train_generator = train_datagen.flow_from_directory(
         trainDirectory,
-        target_size=(224, 224),
+        target_size=(image_height, image_width),
         batch_size=batchSize,
-        class_mode='categorical')
+        class_mode='binary')
 
     validation_generator = test_datagen.flow_from_directory(
         testDirectory,
-        target_size=(224, 224),
+        target_size=(image_height, image_width),
         batch_size=batchSize,
-        class_mode='categorical')
+        class_mode='binary')
 
     return train_generator, validation_generator
 
@@ -126,7 +129,7 @@ def main(argv):
     trainDirectory = argv[1]
     testDirectory = argv[2]
 
-    epochs = 10
+    epochs = 30
     batchSize = 32
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
@@ -138,11 +141,12 @@ def main(argv):
     #model = VGG_16('vgg16_weights.h5')
     print("Compiling model...")
     model = VGG_16()
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9)#, nesterov=True)
-    model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=["accuracy"])
+    sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
     history = AccuracyHistory()
+    modelCheckPoint = ModelCheckpoint("weights.{epoch:02d}-{val_loss:.2f}.hdf", save_best_only=True)
     
     model.fit_generator(
         train_generator,
@@ -150,9 +154,9 @@ def main(argv):
         epochs=epochs,
         verbose=1,
         validation_data=validation_generator,
-        validation_steps=numberOfValidationImages/batchSize)
+        validation_steps=numberOfValidationImages/batchSize,
+        callbacks=[history, modelCheckPoint])
 
-    model.save('zonnepanelen.h5')
 
     #score = model.evaluate(x_test, y_test, verbose=0)
     #print('Test loss:', score[0])
