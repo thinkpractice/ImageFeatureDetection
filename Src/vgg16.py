@@ -137,7 +137,7 @@ def main(argv):
     trainDirectory = argv[1]
     testDirectory = argv[2]
 
-    epochs = 100
+    epochs = 50
     batchSize = 32
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
@@ -150,7 +150,7 @@ def main(argv):
     print("Compiling model...")
     model = VGG_16()
     model.summary()
-    sgd = SGD(lr=0.01, decay=1e-6) # , momentum=0.9, nesterov=True)
+    sgd = SGD(lr=0.1, decay=1e-6) # , momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
