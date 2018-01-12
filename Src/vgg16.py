@@ -2,13 +2,14 @@ from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
-from keras.callbacks import Callback, ModelCheckpoint
+from keras.callbacks import Callback, ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator
 from skimage.io import imread
 from skimage.transform import resize
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 import os
 import sys
 import glob
@@ -74,13 +75,6 @@ def VGG_16(weights_path=None):
 
     return model
 
-class AccuracyHistory(Callback):
-    def on_train_begin(self, logs={}):
-        self.acc = []
-
-    def on_epoch_end(self, batch, logs={}):
-        self.acc.append(logs.get('acc'))
-
 def getImagesInDirectory(directory):
     imageDir = directory + "/**/*.png"
     print(imageDir)
@@ -129,6 +123,10 @@ def loadData(trainDirectory, testDirectory, batchSize):
 
     return train_generator, validation_generator
 
+def getDirectoryNameForRun(epochs, batchSize, learningRate, decay):
+    date = datetime.date.today().strftime("%d%m%Y-%H:%M")
+    return './logs/run_{}_ep={}_bs={}_lr={},dc={}'.format(date, epochs, batchSize, learningRate, decay)
+
 def main(argv):
     if len(argv) <= 2:
         print("usage: vgg16.py <trainDirectory> <testDirectory>")
@@ -137,6 +135,8 @@ def main(argv):
     trainDirectory = argv[1]
     testDirectory = argv[2]
 
+    learningRate = 0.1
+    decay = 1e-6
     epochs = 50
     batchSize = 32
     print("Loading data...")
@@ -154,9 +154,11 @@ def main(argv):
     model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
-    history = AccuracyHistory()
     modelCheckPoint = ModelCheckpoint("weights.{epoch:02d}-{val_loss:.2f}.hdf", save_best_only=True)
-    
+
+    logDir = getDirectoryNameForRun(epochs, batchSize, learningRate, decay)
+    tensorBoard = TensorBoard(log_dir=logDir, batch_size=batchSize, write_images=True)
+
     model.fit_generator(
         train_generator,
         steps_per_epoch=numberOfTrainingImages/batchSize,
@@ -164,18 +166,7 @@ def main(argv):
         verbose=1,
         validation_data=validation_generator,
         validation_steps=numberOfValidationImages/batchSize,
-        callbacks=[history, modelCheckPoint])
-
-
-    #score = model.evaluate(x_test, y_test, verbose=0)
-    #print('Test loss:', score[0])
-    #print('Test accuracy:', score[1])
-    #out = model.predict(im)
-    #print np.argmax(out)
-    plt.plot(range(1,epochs + 1),history.acc)
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.show()
+        callbacks=[modelCheckPoint, tensorBoard])
 
 if __name__ == "__main__":
     main(sys.argv)
