@@ -124,7 +124,7 @@ def loadData(trainDirectory, testDirectory, batchSize):
     return train_generator, validation_generator
 
 def getDirectoryNameForRun(epochs, batchSize, learningRate, decay):
-    date = datetime.date.today().strftime("%d%m%Y-%H:%M")
+    date = datetime.datetime.now().strftime("%d%m%Y-%H:%M")
     return './logs/run_{}_ep={}_bs={}_lr={},dc={}'.format(date, epochs, batchSize, learningRate, decay)
 
 def main(argv):
