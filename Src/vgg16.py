@@ -19,7 +19,7 @@ image_height = 50
 
 def VGG_16(weights_path=None):
     model = Sequential()
-    model.add(Conv2D(16, (3, 3), activation='relu', input_shape=(image_height, image_width, 3)))
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(image_height, image_width, 3)))
     #model.add(MaxPooling2D((2,2)))
     #input 24x24x3
     model.add(Conv2D(32, (3, 3), activation='relu'))
@@ -63,7 +63,7 @@ def VGG_16(weights_path=None):
     #model.add(MaxPooling2D((2,2), strides=(2,2)))
 
     model.add(Flatten())
-    model.add(Dense(512, activation='relu'))
+    model.add(Dense(1024, activation='relu'))
     model.add(Dropout(0.5))
     #model.add(Dense(512, activation='relu'))
     #model.add(Dropout(0.5))
