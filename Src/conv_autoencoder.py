@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers.core import Input, Flatten, Dense, Dropout
+from keras.layers import Input, Flatten, Dense, Dropout
 from keras.layers.convolutional import UpSampling2D, Conv2D, MaxPooling2D, ZeroPadding2D
 from keras.callbacks import Callback, ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
@@ -13,11 +13,13 @@ import os
 import sys
 import glob
 
-image_width = 50
-image_height = 50
+image_width = 48
+image_height = 48
 
 def VGG_16(weights_path=None):
     input_img = Input(shape=(image_height, image_width, 3))
+
+    #encoder
     e = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
     e = MaxPooling2D((2,2), padding='same')(e)
     #input 24x24x3
@@ -28,10 +30,10 @@ def VGG_16(weights_path=None):
     e = Conv2D(64, (3, 3), activation='relu', padding='same')(e)
     e = MaxPooling2D((2,2), padding='same')(e)
 
-    #input 6x6x3
     e = Conv2D(128, (3, 3), activation='relu', padding='same')(e)
-    e = UpSampling2D((2,2), padding='same')(e)
+    e = MaxPooling2D((2,2))(e)
 
+    #decoder
     d = Conv2D(128, (3, 3), activation='relu', padding='same')(e)
     d = UpSampling2D((2,2))(d)
 
@@ -44,7 +46,7 @@ def VGG_16(weights_path=None):
     d = Conv2D(16, (3, 3), activation='relu', padding='same')(d)
     d = UpSampling2D((2,2))(d)
 
-    decoded = Conv2D(1, (3,3), activation='sigmoid', padding='same')(d)
+    decoded = Conv2D(3, (3,3), activation='sigmoid', padding='same')(d)
     model = Model(input_img, decoded)
     return model
 
@@ -56,11 +58,12 @@ def getImagesInDirectory(directory):
 
 def loadImages(directory):
     for filename in getImagesInDirectory(directory):
-        image = load_image(filename)
+        image = load_img(filename)
         imageArray = img_to_array(image)
         imageArray = imageArray.astype('float32') / 255.
-        if image.shape[0] != image_height or image.shape[1] != image_width:
-            yield resize(image, (image_height, image_shape))
+        if imageArray.shape[0] != image_height or imageArray.shape[1] != image_width:
+            imageArray = resize(imageArray, (image_height, image_width))
+        yield imageArray
 
 def countImages(directory):
     return len([item for item in getImagesInDirectory(directory)])
@@ -86,7 +89,7 @@ def main(argv):
     numberOfTrainingImages = trainingImages.shape[0]
     print(numberOfTrainingImages)
     validationImages = np.array([image for image in loadImages(testDirectory)])
-    numberOfValidationImages = validationImage.shape[0]
+    numberOfValidationImages = validationImages.shape[0]
     print(numberOfValidationImages)
 
     print("Compiling model...")
