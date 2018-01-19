@@ -136,7 +136,7 @@ def main(argv):
 
     learningRate = 0.1
     decay = 1e-6
-    epochs = 50
+    epochs = 100
     batchSize = 32
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
