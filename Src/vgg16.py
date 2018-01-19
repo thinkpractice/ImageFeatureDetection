@@ -63,7 +63,7 @@ def VGG_16(weights_path=None):
     #model.add(MaxPooling2D((2,2), strides=(2,2)))
 
     model.add(Flatten())
-    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(2048, activation='relu'))
     model.add(Dropout(0.5))
     #model.add(Dense(512, activation='relu'))
     #model.add(Dropout(0.5))
