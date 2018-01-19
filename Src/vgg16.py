@@ -20,20 +20,19 @@ image_height = 50
 def VGG_16(weights_path=None):
     model = Sequential()
     model.add(Conv2D(16, (3, 3), activation='relu', input_shape=(image_height, image_width, 3)))
-    model.add(MaxPooling2D((2,2)))
-    model.add(Dropout(0.2))
+    #model.add(MaxPooling2D((2,2)))
     #input 24x24x3
     model.add(Conv2D(32, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((2,2)))
+    #model.add(Dropout(0.2))
+    #model.add(MaxPooling2D((2,2)))
 
-    model.add(Dropout(0.2))
     #input 12x12x3
     model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((2,2)))
+    #model.add(MaxPooling2D((2,2)))
 
-    model.add(Dropout(0.2))
     #input 6x6x3
     model.add(Conv2D(128, (3, 3), activation='relu'))
+    #model.add(Dropout(0.2))
     model.add(MaxPooling2D((2,2)))
      
     #input 4x4x3

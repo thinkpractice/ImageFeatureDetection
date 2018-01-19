@@ -15,35 +15,36 @@ import glob
 
 image_width = 48
 image_height = 48
+num_layers = 64
 
 def VGG_16(weights_path=None):
     input_img = Input(shape=(image_height, image_width, 3))
 
     #encoder
-    e = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
-    e = MaxPooling2D((2,2), padding='same')(e)
+    e = Conv2D(num_layers, (3, 3), activation='relu', padding='same')(input_img)
+    #e = MaxPooling2D((2,2), padding='same')(e)
     #input 24x24x3
-    e = Conv2D(32, (3, 3), activation='relu', padding='same')(e)
-    e = MaxPooling2D((2,2), padding='same')(e)
+    e = Conv2D(num_layers, (3, 3), activation='relu', padding='same')(e)
+    #e = MaxPooling2D((2,2), padding='same')(e)
 
     #input 12x12x3
-    e = Conv2D(64, (3, 3), activation='relu', padding='same')(e)
-    e = MaxPooling2D((2,2), padding='same')(e)
+    e = Conv2D(num_layers, (3, 3), activation='relu', padding='same')(e)
+    #e = MaxPooling2D((2,2), padding='same')(e)
 
-    e = Conv2D(128, (3, 3), activation='relu', padding='same')(e)
+    e = Conv2D(num_layers, (3, 3), activation='relu', padding='same')(e)
     e = MaxPooling2D((2,2))(e)
 
     #decoder
-    d = Conv2D(128, (3, 3), activation='relu', padding='same')(e)
-    d = UpSampling2D((2,2))(d)
+    d = Conv2D(num_layers, (3, 3), activation='relu', padding='same')(e)
+    #d = UpSampling2D((2,2))(d)
 
-    d = Conv2D(64, (3, 3), activation='relu', padding='same')(d)
-    d = UpSampling2D((2,2))(d)
+    d = Conv2D(num_layers, (3, 3), activation='relu', padding='same')(d)
+    #d = UpSampling2D((2,2))(d)
 
-    d = Conv2D(32, (3, 3), activation='relu', padding='same')(d)
-    d = UpSampling2D((2,2))(d)
+    d = Conv2D(num_layers, (3, 3), activation='relu', padding='same')(d)
+    #d = UpSampling2D((2,2))(d)
 
-    d = Conv2D(16, (3, 3), activation='relu', padding='same')(d)
+    d = Conv2D(num_layers, (3, 3), activation='relu', padding='same')(d)
     d = UpSampling2D((2,2))(d)
 
     decoded = Conv2D(3, (3,3), activation='sigmoid', padding='same')(d)
@@ -82,8 +83,8 @@ def main(argv):
 
     learningRate = 0.1
     decay = 1e-6
-    epochs = 50
-    batchSize = 32
+    epochs = 100
+    batchSize = 64
     print("Loading data...")
     trainingImages = np.array([image for image in loadImages(trainDirectory)])
     numberOfTrainingImages = trainingImages.shape[0]
@@ -107,8 +108,25 @@ def main(argv):
         trainingImages, trainingImages,
         epochs=epochs,
         verbose=1,
+        shuffle=True,
         validation_data=(validationImages, validationImages),
         callbacks=[modelCheckPoint, tensorBoard])
+
+    decoded_imgs = model.predict(validationImages)
+
+    n = 20
+    plt.figure(figsize=(20, 4))
+    for i in range(n):
+        ax = plt.subplot(2, n, i + 1)
+        plt.imshow(validationImages[-i])
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+              
+        ax = plt.subplot(2, n, i + 1 + n)
+        plt.imshow(decoded_imgs[-i])
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+    plt.show()
 
 if __name__ == "__main__":
     main(sys.argv)
