@@ -48,7 +48,7 @@ def VGG_16(weights_path=None):
 
     model.add(Flatten())
     #model.add(Dense(2048, activation='relu'))
-    model.add(Dense(256, activation='relu'))
+    model.add(Dense(512, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(128, activation='relu'))
     model.add(Dropout(0.5))
