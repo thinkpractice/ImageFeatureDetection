@@ -7,6 +7,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from skimage.io import imread
 from skimage.transform import resize
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
@@ -23,7 +24,7 @@ def VGG_16(weights_path=None):
     #model.add(MaxPooling2D((2,2)))
     #input 24x24x3
     model.add(Conv2D(128, (3, 3), activation='relu'))
-    #model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(MaxPooling2D((2,2)))
 
     #model.add(Dropout(0.2))
     #model.add(MaxPooling2D((2,2)))
@@ -35,7 +36,7 @@ def VGG_16(weights_path=None):
     #input 6x6x3
     model.add(Conv2D(512, (3, 3), activation='relu'))
     #model.add(Dropout(0.2))
-    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
      
     #input 4x4x3
     #model.add(Conv2D(256, (3, 3), activation='relu'))
@@ -61,11 +62,12 @@ def VGG_16(weights_path=None):
 
     return model
 
-def getImagesInDirectory(directory):
-    imageDir = directory + "/**/*.png"
-    print(imageDir)
-    for filename in glob.glob(imageDir, recursive=True):
-        yield os.path.join(directory, filename)
+def getImagesInDirectory(directory, recursive):
+    imageDir = directory + "/*.png"
+    if recursive:
+        imageDir = directory + "/**/*.png"
+    for filename in glob.glob(imageDir, recursive=recursive):
+        yield os.path.abspath(filename)
 
 def padImage(image, newWidth, newHeight):
     extraRows = newWidth - image.shape[0]
@@ -73,16 +75,18 @@ def padImage(image, newWidth, newHeight):
     paddedChannels = [np.pad(image[:,:,i],((0, extraRows), (0, extraColumns)), mode="constant",constant_values=0) for i in range(3)]
     return np.stack(paddedChannels, axis = 2)
 
-def loadImages(directory):
-    for filename in getImagesInDirectory(directory):
-        image = imread(filename)
-        if image.shape[0] > 224 or image.shape[1] > 224:
-            yield resize(image, (224, 224))
-        else:
-            yield padImage(image, 224, 224)
+def loadImages(directory, label):
+    labels = []
+    images = []
+    for filename in getImagesInDirectory(directory, False):
+        image = imread(filename) * (1. / 255)
+        resizedImage = resize(image, (image_height, image_width))
+        images.append(resizedImage)
+        labels.append(label)
+    return labels, images
 
 def countImages(directory):
-    return len([item for item in getImagesInDirectory(directory)])
+    return len([item for item in getImagesInDirectory(directory, True)])
 
 def loadData(trainDirectory, testDirectory, batchSize):
     train_datagen = ImageDataGenerator(rescale=1./255,
@@ -123,7 +127,8 @@ def main(argv):
 
     learningRate = 0.01
     decay = 1e-6
-    epochs = 100
+    epochs = 200
+    #epochs = 20
     batchSize = 32
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize)
@@ -136,7 +141,7 @@ def main(argv):
     print("Compiling model...")
     model = VGG_16()
     model.summary()
-    sgd = SGD(lr=learningRate, decay=decay, momentum=0.7)#, nesterov=True)
+    sgd = SGD(lr=learningRate, decay=decay, momentum=0.6, nesterov=True)
     model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
@@ -153,6 +158,24 @@ def main(argv):
         validation_data=validation_generator,
         validation_steps=numberOfValidationImages/batchSize,
         callbacks=[modelCheckPoint, tensorBoard])
+
+
+    positive_labels, positive_images = loadImages(os.path.join(testDirectory, "Positives"), 1)
+    negative_labels, negative_images = loadImages(os.path.join(testDirectory, "Negatives"), 0)
+    labels = positive_labels
+    labels.extend(negative_labels)
+    images = positive_images
+    images.extend(negative_images)
+    
+    predictions = model.predict(np.array(images))
+    predictions = [round(prediction[0]) for prediction in predictions]
+    print(predictions)
+   
+    classificationReport = classification_report(labels, predictions)
+    print("Classification Report: {}".format(classificationReport))
+
+    confusionMatrix = confusion_matrix(labels, predictions)
+    print("Confusion Matrix: {}".format(confusionMatrix))
 
 if __name__ == "__main__":
     main(sys.argv)
