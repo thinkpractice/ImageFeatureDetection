@@ -1,4 +1,5 @@
 from keras.models import load_model
+from keras.utils import to_categorical
 from skimage.io import imread
 from skimage.transform import resize
 from sklearn.model_selection import train_test_split
@@ -8,6 +9,10 @@ import sys
 import glob
 import numpy as np
 
+def getImmediateSubdirectories(a_dir):
+    return [name for name in os.listdir(a_dir)
+            if os.path.isdir(os.path.join(a_dir, name))]
+
 def getImagesInDirectory(directory, recursive):
     imageDir = directory + "/*.png"
     if recursive:
@@ -15,7 +20,7 @@ def getImagesInDirectory(directory, recursive):
     for filename in glob.glob(imageDir, recursive=recursive):
         yield os.path.abspath(filename)
 
-def loadImages(directory, label):
+def loadImages(directory, label, image_width, image_height):
     labels = []
     images = []
     for filename in getImagesInDirectory(directory, False):
@@ -26,9 +31,16 @@ def loadImages(directory, label):
     return labels, images
 
 def main(argv):
+    image_width = 50
+    image_height = 50
+
     if len(argv) <= 2:
-        print("usage: EvaluateModel.py <modelFilename> <testDirectory>")
+        print("usage: EvaluateModel.py <modelFilename> <testDirectory> {image_width} {image_height}")
         exit(1)
+
+    if len(argv) >= 5:
+        image_width = int(argv[3])
+        image_height = int(argv[4])
 
     modelDirectory = argv[1]
     testDirectory = argv[2]
@@ -36,14 +48,20 @@ def main(argv):
     model = load_model(modelDirectory)
     model.summary()
 
-    positive_labels, positive_images = loadImages(os.path.join(testDirectory, "Positives"), 1)
-    negative_labels, negative_images = loadImages(os.path.join(testDirectory, "Negatives"), 0)
-    labels = positive_labels
-    labels.extend(negative_labels)
-    images = positive_images
-    images.extend(negative_images)
+    labels = []
+    images = []
+    numberOfLabels = 0
+    for index, categoryDir in enumerate(getImmediateSubdirectories(testDirectory)):
+        category_labels, category_images = loadImages(os.path.join(testDirectory, categoryDir), index, image_width, image_height)
+        labels.extend(category_labels)
+        images.extend(category_images)
+        numberOfLabels += 1
     
+    if numberOfLabels > 2:
+        labels = to_categorical(labels)
+
     predictions = model.predict(np.array(images))
+    print(predictions[0])
     predictions = [round(prediction[0]) for prediction in predictions]
     print(predictions)
    
