@@ -25,7 +25,7 @@ def loadImages(directory, label, image_width, image_height):
     images = []
     for filename in getImagesInDirectory(directory, False):
         image = imread(filename) * (1. / 255)
-        resizedImage = resize(image, (image_height, image_width))
+        resizedImage = resize(image, (image_height, image_width, 3))
         images.append(resizedImage)
         labels.append(label)
     return labels, images
@@ -61,14 +61,16 @@ def main(argv):
         labels = to_categorical(labels)
 
     predictions = model.predict(np.array(images))
-    print(predictions[0])
-    predictions = [round(prediction[0]) for prediction in predictions]
-    print(predictions)
-   
-    classificationReport = classification_report(labels, predictions)
+    class_predictions = [round(prediction[0]) for prediction in predictions]
+    if numberOfLabels > 2:
+        class_predictions = [np.argmax(prediction) for prediction in predictions]
+        labels = [np.argmax(label) for label in labels]
+    print(class_predictions)
+
+    classificationReport = classification_report(labels, class_predictions)
     print("Classification Report: {}".format(classificationReport))
 
-    confusionMatrix = confusion_matrix(labels, predictions)
+    confusionMatrix = confusion_matrix(labels, class_predictions)
     print("Confusion Matrix: {}".format(confusionMatrix))
 
 if __name__ == "__main__":
