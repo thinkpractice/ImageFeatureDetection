@@ -145,7 +145,7 @@ def main(argv):
     model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
-    modelCheckPoint = ModelCheckpoint("weights.{epoch:02d}-{val_loss:.2f}.hdf", save_best_only=True)
+    modelCheckPoint = ModelCheckpoint("weights.{epoch:02d}-{val_acc:.2f}.hdf", save_best_only=True)
 
     logDir = getDirectoryNameForRun(epochs, batchSize, learningRate, decay)
     tensorBoard = TensorBoard(log_dir=logDir, batch_size=batchSize, write_images=True)

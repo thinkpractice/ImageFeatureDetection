@@ -63,9 +63,9 @@ def main(argv):
     predictions = model.predict(np.array(images))
     class_predictions = [round(prediction[0]) for prediction in predictions]
     if numberOfLabels > 2:
+        print("categorical")
         class_predictions = [np.argmax(prediction) for prediction in predictions]
         labels = [np.argmax(label) for label in labels]
-    print(class_predictions)
 
     classificationReport = classification_report(labels, class_predictions)
     print("Classification Report: {}".format(classificationReport))
